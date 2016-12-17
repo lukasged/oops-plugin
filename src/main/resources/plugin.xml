@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+	<!-- Tabs -->
+   
+	<extension id="OOPSWorkspaceTab" point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="OOPS! Evaluator"/>
+		<class value="oops.ui.OOPSWorkspaceTab"/>
+		<index value="Y"/>
+		<editorKitId value="OWLEditorKit"/>
+		<defaultViewConfigFileName value="viewconfig-oopsTab.xml"/>
+   </extension>   
+
+	<!-- Views -->
+	
+	<extension id="OOPSClassHierarchyViewComponent" point="org.protege.editor.core.application.ViewComponent">
+		<label value="Class hierarchy" />
+		<class value="oops.ui.OOPSClassHierarchyViewComponent" />
+		<headerColor value="@org.protege.ontologycolor"/>
+		<category value="@org.protege.ontologycategory" />
+	</extension>	
+	
+	<extension id="IndividualPitfallsListViewComponent" point="org.protege.editor.core.application.ViewComponent">
+		<label value="OOPS! Pitfalls for the selected element" />
+		<class value="oops.ui.IndividualPitfallsListComponent" />
+		<headerColor value="@org.protege.ontologycolor"/>
+		<category value="@org.protege.ontologycategory" />
+	</extension>	
+    
+</plugin>
