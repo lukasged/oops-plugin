@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-    <HSNode splits="0.8 0.2">
+    <HSNode splits="0.7 0.2 0.1">
         <VSNode splits="0.375 0.625">
             <HSNode splits="0.5 0.5">
                 <CNode>
@@ -35,6 +35,11 @@
         <CNode>
             <Component label="Detected pitfalls">
                 <Property id="pluginId" value="oops.IndividualPitfallsListViewComponent"/>
+            </Component>
+        </CNode>
+        <CNode>
+            <Component>
+                <Property id="pluginId" value="oops.OOPSControlViewComponent"/>
             </Component>
         </CNode>
     </HSNode>

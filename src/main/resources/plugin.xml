@@ -16,17 +16,21 @@
 	<!-- Views -->
 	
 	<extension id="OOPSClassHierarchyViewComponent" point="org.protege.editor.core.application.ViewComponent">
-		<label value="Class hierarchy" />
-		<class value="oops.ui.OOPSClassHierarchyViewComponent" />
+		<label value="Class hierarchy"/>
+		<class value="oops.ui.OOPSClassHierarchyViewComponent"/>
 		<headerColor value="@org.protege.ontologycolor"/>
-		<category value="@org.protege.ontologycategory" />
 	</extension>	
 	
 	<extension id="IndividualPitfallsListViewComponent" point="org.protege.editor.core.application.ViewComponent">
-		<label value="OOPS! Pitfalls for the selected element" />
-		<class value="oops.ui.IndividualPitfallsListComponent" />
+		<label value="OOPS! Pitfalls for the selected element"/>
+		<class value="oops.ui.IndividualPitfallsListComponent"/>
 		<headerColor value="@org.protege.ontologycolor"/>
-		<category value="@org.protege.ontologycategory" />
+	</extension>
+	
+	<extension id="OOPSControlViewComponent" point="org.protege.editor.core.application.ViewComponent">
+		<label value="OOPS! Control panel"/>
+		<class value="oops.ui.OOPSControlViewComponent"/>
+		<headerColor value="@org.protege.ontologycolor"/>
 	</extension>	
     
 </plugin>

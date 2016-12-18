@@ -16,6 +16,7 @@ import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
@@ -45,7 +46,7 @@ import java.util.stream.Stream;
  * A custom Protégé view component for the OOPS! plugin that shows the detected pitfalls for the selected element.
  */
 public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
-		implements Resettable, SelectionPlane, OWLSelectionModelListener {
+		implements Resettable, SelectionPlane, OWLSelectionModelListener, EvaluationListener {
 
     public static final String ID = "org.protege.editor.owl.SelectedEntityView";
 
@@ -68,7 +69,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     private static final String DATATYPES_PANEL = "Datatypes";
 
     private static final String BLANK_PANEL = "Blank";
-
+    
+    private static final String INITIAL_ROOT_NOTE_TEXT = "Pitfalls (evaluate the ontology to see its pitfalls)";
 
     private static final Logger logger = LoggerFactory.getLogger(IndividualPitfallsListComponent.class);
 
@@ -91,7 +93,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     	pitfallsTree.setEnabled(false); // disable the pitfalls tree while evaluating
     	
     	try {
-			evaluationResult = evaluator.evaluate(getOWLEditorKit().getOWLModelManager().getActiveOntology());
+			evaluator.evaluate(getOWLEditorKit().getOWLModelManager().getActiveOntology());
 			
 			logger.info(String.format("evaluationTask[PitfallsListComp] finished in %d seconds", 
 					Duration.between(startInstant, Instant.now()).getSeconds()));
@@ -111,14 +113,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         entityIRILabel.setBorder(BorderFactory.createEmptyBorder(1, 4, 3, 0));
         add(entityIRILabel, BorderLayout.NORTH);
         
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode("Pitfalls");
-        DefaultMutableTreeNode minor = new DefaultMutableTreeNode("Minor (0 items)");
-        DefaultMutableTreeNode important = new DefaultMutableTreeNode("Important (0 items)");
-        DefaultMutableTreeNode critical = new DefaultMutableTreeNode("Critical (0 items)");
-        
-        top.add(minor);
-        top.add(important);
-        top.add(critical);
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(INITIAL_ROOT_NOTE_TEXT);
         
         pitfallsTree = new JTree(top);
         pitfallsTreeView = new JScrollPane(pitfallsTree);
@@ -134,12 +129,11 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         evaluator = OOPSEvaluator.getInstance();
         
-        getOWLWorkspace().getOWLSelectionModel().addListener(this);
-        getView().setShowViewBar(false);
-        selectionChanged();
+        evaluator.addListener(this);
         
-        Thread thread = new Thread(evaluationTask);
-        thread.start();
+        getOWLWorkspace().getOWLSelectionModel().addListener(this);
+        getView().setShowViewBar(false); // disable view label bar
+        selectionChanged();
     }
 
     private void createViewPanes(boolean reset) {
@@ -203,6 +197,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         for (ViewsPane pane : viewsPanes){
             pane.saveViews();
         }
+        
+        logger.info("IndividualPitfallsListComponent received reset event!!");
     }
 
     private void selectPanel(String name) {
@@ -214,6 +210,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             pane.saveViews();
             pane.dispose();
         }
+        
+        evaluator.removeListener(this);
     }
 
     @Override
@@ -301,6 +299,21 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             pitfallsTree.setModel(new DefaultTreeModel(top));
         }
         
+	}
+
+	@Override
+	public void onEvaluationStarted() {
+		logger.info("IndividualPitfallsList received evaluation start event!!");
+		
+		pitfallsTree.setEnabled(false); // disable the pitfalls tree during evaluation
+	}
+
+	@Override
+	public void onEvaluationDone(EvaluationResult result) {
+		logger.info("IndividualPitfallsList received evaluation results!!");
+		
+		evaluationResult = result;
+		pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
 	}
 
 }

@@ -22,6 +22,7 @@ import org.semanticweb.owlapi.model.parameters.Imports;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
 import oops.model.EvaluationResult;
 
@@ -42,7 +43,7 @@ import java.util.List;
  * TreeCellRenderer to let the users find elements with pitfalls quickly and intuitively.
  */
 public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyViewComponent
-        implements CreateNewTarget, CreateNewChildTarget, CreateNewSiblingTarget, SelectionDriver {
+        implements CreateNewTarget, CreateNewChildTarget, CreateNewSiblingTarget, SelectionDriver, EvaluationListener {
 
     private static final OWLClassIcon OWL_CLASS_ICON = new OWLClassIcon();
 
@@ -69,7 +70,8 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
     	logger.info(String.format("evaluationTask[TreeViewComp] in thread %s", Thread.currentThread().getName()));
     	
     	try {
-			evaluationResult = evaluator.evaluate(getOWLEditorKit().getOWLModelManager().getActiveOntology());
+    		getTree().setEnabled(false); // disable the tree view during evaluation
+			evaluator.evaluate(getOWLEditorKit().getOWLModelManager().getActiveOntology());
 			
 			logger.info(String.format("evaluationTask[TreeViewComp] finished in %d seconds", 
 					Duration.between(startInstant, Instant.now()).getSeconds()));
@@ -79,6 +81,8 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
 		} catch (InterruptedException e) {
 			logger.error("There has been an error while trying to evaluate the ontology");
 			logger.error(e.getLocalizedMessage());
+		} finally {
+			getTree().setEnabled(true); // re-enable the tree view
 		}
     };
 
@@ -158,13 +162,7 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
         
         evaluator = OOPSEvaluator.getInstance();
         
-        //log.info("LukasTreeViewComponent adding listener!!");
-        //OOPSEvaluator.addListener(this); // listen for evaluation events
-        
-        // evaluate the activate ontology
-        logger.info("LukasTreeViewComponent calling for evaluation!!");
-        Thread thread = new Thread(evaluationTask);
-        thread.start();
+        evaluator.addListener(this);
     }
 
     private void handleAdd(OWLClass child, OWLClass parent) {
@@ -326,5 +324,24 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
     @Override
     public void disposeView() {
         super.disposeView();
+        
+        evaluator.removeListener(this);
     }
+
+	@Override
+	public void onEvaluationStarted() {
+		logger.info("OOPSClassHierarchy received evaluation start event!!");
+		
+		getTree().setEnabled(false); // disable the tree view during evaluation
+	}
+
+	@Override
+	public void onEvaluationDone(EvaluationResult result) {
+		evaluationResult = result;
+
+		logger.info("OOPSClassHierarchy received evaluation results!!");
+		
+		getTree().setCellRenderer(new OOPSTreeCellRenderer(getOWLEditorKit(), evaluationResult));
+		getTree().setEnabled(true); // re-enable the tree view after evaluation
+	}
 }

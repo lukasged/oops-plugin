@@ -72,7 +72,6 @@
 							*
 						</Import-Package>						
 					</instructions>
-					<buildDirectory>/Users/lukasged/git/protege/protege-desktop/target/protege-5.1.1-SNAPSHOT-platform-independent/Protege-5.1.1-SNAPSHOT/bundles</buildDirectory>
 				</configuration>
 			</plugin>
 
