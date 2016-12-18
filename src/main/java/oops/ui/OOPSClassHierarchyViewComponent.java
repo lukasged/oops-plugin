@@ -29,6 +29,7 @@ import oops.model.EvaluationResult;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -332,7 +333,13 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
 	public void onEvaluationStarted() {
 		logger.info("OOPSClassHierarchy received evaluation start event!!");
 		
-		getTree().setEnabled(false); // disable the tree view during evaluation
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				getTree().setEnabled(false); // disable the tree view during evaluation
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 	}
 
 	@Override
@@ -341,7 +348,13 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
 
 		logger.info("OOPSClassHierarchy received evaluation results!!");
 		
-		getTree().setCellRenderer(new OOPSTreeCellRenderer(getOWLEditorKit(), evaluationResult));
-		getTree().setEnabled(true); // re-enable the tree view after evaluation
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				getTree().setCellRenderer(new OOPSTreeCellRenderer(getOWLEditorKit(), evaluationResult));
+				getTree().setEnabled(true); // re-enable the tree view after evaluation
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 	}
 }

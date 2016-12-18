@@ -127,7 +127,7 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
 
     public OOPSTreeCellRenderer(OWLEditorKit owlEditorKit, boolean renderExpression, boolean renderIcon) {
-        this.owlEditorKit = owlEditorKit;
+    	this.owlEditorKit = owlEditorKit;
         this.renderExpression = renderExpression;
         this.renderIcon = renderIcon;
         this.equivalentObjects = new HashSet<>();
@@ -347,8 +347,8 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
 
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
-                                                  boolean leaf, int row, boolean hasFocus) {
-        if (value instanceof OWLObjectTreeNode){
+                                                  boolean leaf, int row, boolean hasFocus) {  	
+    	if (value instanceof OWLObjectTreeNode){
             OWLObjectTreeNode node = (OWLObjectTreeNode) value;
             setEquivalentObjects(node.getEquivalentObjects());
             value = node.getOWLObject();
@@ -462,7 +462,7 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
 
     private Component prepareRenderer(Object value, boolean isSelected, boolean hasFocus) {
-        renderingComponent.setOpaque(isSelected || opaque);
+    	renderingComponent.setOpaque(isSelected || opaque);
         
         Icon icon = null;
 
@@ -481,7 +481,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             }
             
             ArrayList<Pitfall> nodePitfalls = evaluationResult.getPitfallsForOWLEntity(entity.getIRI().toString());
-            logger.info(String.format("The detected pitfalls for %s are the following : %s", entity.getIRI(), nodePitfalls));
             
             if (nodePitfalls != null) { // node presents some pitfalls
             	setUnderlinedText(true);
@@ -513,7 +512,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             }
             
         }
-
 
         prepareTextPane(getRendering(value), isSelected);
 

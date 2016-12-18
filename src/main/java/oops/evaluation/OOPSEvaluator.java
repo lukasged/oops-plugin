@@ -32,42 +32,6 @@ public class OOPSEvaluator {
     
     private static EvaluationResult evaluationResults = null;
     
-    private static void evaluationTaskDelegate() {
-    	listeners.forEach(l -> l.onEvaluationStarted()); // notify all listeners about evaluation start
-    	
-    	Instant startInstant = Instant.now();
-    	logger.info(String.format("evaluationTask[OOPSEvaluator] in thread %s", Thread.currentThread().getName()));
-    	
-		HashMap<String, ArrayList<Pitfall>> detectedPitfalls = new HashMap<String, ArrayList<Pitfall>>();
-		
-		try {
-			Thread.sleep(7000); // simulation of a long-running web service call
-			
-			detectedPitfalls.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#Pizza",
-					new ArrayList<Pitfall>(
-							Arrays.asList(new Pitfall(PitfallImportanceLevel.IMPORTANT, "P1", "P1 is about bla bla"),
-									new Pitfall(PitfallImportanceLevel.CRITICAL, "P3", "P3 must be avoided!"),
-									new Pitfall(PitfallImportanceLevel.CRITICAL, "P9", "P9 is unacceptable!"))));
-
-			detectedPitfalls.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#Spiciness",
-					new ArrayList<Pitfall>(
-							Arrays.asList(new Pitfall(PitfallImportanceLevel.MINOR, "P2", "Missing annotations..."),
-									new Pitfall(PitfallImportanceLevel.IMPORTANT, "P8",
-											"The ontology lacks information about equivalent properties "
-													+ "(owl:equivalentProperty) in the cases of duplicated "
-													+ "relationships and/or attributes."))));
-	        
-	        evaluationResults = new EvaluationResult(detectedPitfalls);
-	        
-	        logger.info(String.format("evaluationTask[OOPSEvaluator] finished in %d seconds", 
-					Duration.between(startInstant, Instant.now()).getSeconds()));
-	        
-	        listeners.forEach(l -> l.onEvaluationDone(evaluationResults)); // send results to each listener
-		} catch (InterruptedException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-    }
-    
     private static Runnable evaluationTask = () -> {
     	listeners.forEach(l -> l.onEvaluationStarted()); // notify all listeners about evaluation start
     	
@@ -146,10 +110,8 @@ public class OOPSEvaluator {
 	 * @throws InterruptedException
 	 */
 	public void evaluate(OWLOntology ontology) throws InterruptedException {
-		// Thread thread = new Thread(evaluationTask);
-		// thread.start();
-		
-		evaluationTaskDelegate();
+		Thread thread = new Thread(evaluationTask);
+		thread.start();
 	}
 
 }

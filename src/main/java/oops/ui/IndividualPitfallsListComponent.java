@@ -29,6 +29,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
@@ -305,7 +306,13 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 	public void onEvaluationStarted() {
 		logger.info("IndividualPitfallsList received evaluation start event!!");
 		
-		pitfallsTree.setEnabled(false); // disable the pitfalls tree during evaluation
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				pitfallsTree.setEnabled(false); // disable the pitfalls tree during evaluation
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 	}
 
 	@Override
@@ -313,7 +320,14 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 		logger.info("IndividualPitfallsList received evaluation results!!");
 		
 		evaluationResult = result;
-		pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
+		
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 	}
 
 }

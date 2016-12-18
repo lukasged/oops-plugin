@@ -82,14 +82,14 @@ public class OOPSWorkspaceTab extends WorkspaceViewsTab implements SelectionPlan
         super.initialise();
         selectionPlaneDelegate = new SelectionPlaneImpl(getOWLEditorKit().getOWLWorkspace().getOWLSelectionModel());
         getOWLEditorKit().getWorkspace().registerOWLEntityDisplayProvider(provider);
-        log.info("Example Lukas Tab initialized");
+        log.info("OOPS! workspace tab initialized");
     }
 
 
     public void dispose() {
         getOWLEditorKit().getWorkspace().unregisterOWLEntityDisplayProvider(provider);
         super.dispose();
-        log.info("Example Lukas Tab disposed");
+        log.info("OOPS! workspace tab disposed");
     }
 
     @Override
