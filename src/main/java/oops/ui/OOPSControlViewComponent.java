@@ -1,14 +1,14 @@
 package oops.ui;
 
 import java.awt.FlowLayout;
-
 import javax.swing.JButton;
-
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
+import oops.model.EvaluationResult;
 
 /**
  * Author: Lukas Gedvilas<br>
@@ -16,7 +16,7 @@ import oops.evaluation.OOPSEvaluator;
  *
  * The view component with the controls for the OOPS! plugin
  */
-public class OOPSControlViewComponent extends AbstractOWLViewComponent {
+public class OOPSControlViewComponent extends AbstractOWLViewComponent implements EvaluationListener{
 	private static final Logger logger = LoggerFactory.getLogger(OOPSControlViewComponent.class);
 	
 	private static final String EVALUATE_BUTTON_LABEL = "Evaluate";
@@ -27,12 +27,16 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent {
 	private static final String CONFIG_OPTIONS_BUTTON_TOOLTIP = "Configure the options for the evaluation";
 	
 	private OOPSEvaluator evaluator;
+	
+	private EvaluationDialog evaluatingDialog;
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		setLayout(new FlowLayout());
 		
 		evaluator = OOPSEvaluator.getInstance();
+		
+		evaluatingDialog = new EvaluationDialog();
 		
 		JButton btnEvaluate = new JButton(EVALUATE_BUTTON_LABEL);
 		btnEvaluate.setToolTipText(EVALUATE_BUTTON_TOOLTIP);
@@ -48,9 +52,10 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent {
 		add(btnConfigEval);
 		add(btnEvaluate);
 		
-		btnEvaluate.addActionListener(e -> {
+		evaluator.addListener(this);
+		
+		btnEvaluate.addActionListener(event -> {
 			logger.info("Evaluation button was clicked.");
-			//btnEvaluate.setEnabled(false); // disable the evaluation button while evaluating
 			
 			try {
 				logger.info("Calling to evaluate from the OOPSControl");
@@ -58,8 +63,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent {
 				logger.info("Returned to OOPSControl after evaluation");
 			} catch (InterruptedException ie) {
 				logger.error(ie.getLocalizedMessage());
-			} finally {
-				//btnEvaluate.setEnabled(true); // re-enable the evaluation button after evaluation
 			}
 		});
 		
@@ -67,5 +70,17 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent {
 	}
 	
 	@Override
-	protected void disposeOWLView() {}
+	protected void disposeOWLView() {
+		evaluator.removeListener(this);
+	}
+
+	@Override
+	public void onEvaluationStarted() {
+		evaluatingDialog.setVisible(true);
+	}
+
+	@Override
+	public void onEvaluationDone(EvaluationResult result) {
+		evaluatingDialog.setVisible(false);
+	}
 }
