@@ -5,6 +5,12 @@ import java.net.URL;
 
 import javax.swing.*;
 
+/**
+ * Author: Lukas Gedvilas<br>
+ * Universidad Politécnica de Madrid<br><br>
+ *
+ * A custom popup window to show while evaluating the ontology
+ */
 public class EvaluationDialog extends JPanel{
 
 	private static final String EVALUATING_LABEL_TEXT = "OOPS! is scanning ...";
