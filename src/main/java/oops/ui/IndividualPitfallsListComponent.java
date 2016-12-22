@@ -228,7 +228,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     }
 
 	@Override
-	public void selectionChanged() throws Exception {
+	public void selectionChanged() {
         OWLObject selectedObject = getOWLWorkspace().getOWLSelectionModel().getSelectedObject();
         if(selectedObject == null) {
             entityIRILabel.setIcon(null);
@@ -324,6 +324,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 		try {
 			SwingUtilities.invokeAndWait(() -> {
 				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
+				selectionChanged(); // update view with the selected element
 			});
 		} catch (InvocationTargetException | InterruptedException e) {
 			logger.error(e.getLocalizedMessage());
