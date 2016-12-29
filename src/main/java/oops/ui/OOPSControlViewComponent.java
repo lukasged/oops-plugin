@@ -92,9 +92,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	@Override
 	public void OnEvaluationException(Throwable exception) {
 		evaluatingDialog.setVisible(false);
-		final String errorMessage = exception instanceof IOException ? 
-				"OOPS! plugin requires internet connectivity" :
-				"There has been an error while evaluating your ontology";
+		final String errorMessage = "There has been an error while contacting OOPS! Web Service\n\n" +
+					"The error may be caused by your internet connectivity or the OOPS! service is unavailable.";
 		
 		SwingUtilities.invokeLater(() -> {
 			JOptionPane.showMessageDialog(null,
