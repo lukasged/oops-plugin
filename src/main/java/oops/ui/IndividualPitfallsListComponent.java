@@ -330,4 +330,16 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 		}
 	}
 
+	@Override
+	public void OnEvaluationException(Throwable exception) {
+		logger.info("IndividualPitfallsList received evaluation exception!!");
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
+	}
+
 }

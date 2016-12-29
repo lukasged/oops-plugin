@@ -357,4 +357,17 @@ public class OOPSClassHierarchyViewComponent extends AbstractOWLClassHierarchyVi
 			logger.error(e.getLocalizedMessage());
 		}
 	}
+
+	@Override
+	public void OnEvaluationException(Throwable exception) {
+		logger.info("OOPSClassHierarchy received evaluation exception!!");
+		
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				getTree().setEnabled(true); // re-enable the tree view after evaluation
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			logger.error(e.getLocalizedMessage());
+		}
+	}
 }

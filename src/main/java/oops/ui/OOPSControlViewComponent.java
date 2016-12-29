@@ -1,7 +1,12 @@
 package oops.ui;
 
 import java.awt.FlowLayout;
+import java.io.IOException;
+
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +57,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		add(btnConfigEval);
 		add(btnEvaluate);
 		
-		evaluator.addListener(this);
+		evaluator.addListener(this); // listen to evaluation events to change the UI
 		
 		btnEvaluate.addActionListener(event -> {
 			logger.info("Evaluation button was clicked.");
@@ -82,5 +87,20 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	@Override
 	public void onEvaluationDone(EvaluationResult result) {
 		evaluatingDialog.setVisible(false);
+	}
+
+	@Override
+	public void OnEvaluationException(Throwable exception) {
+		evaluatingDialog.setVisible(false);
+		final String errorMessage = exception instanceof IOException ? 
+				"OOPS! plugin requires internet connectivity" :
+				"There has been an error while evaluating your ontology";
+		
+		SwingUtilities.invokeLater(() -> {
+			JOptionPane.showMessageDialog(null,
+					errorMessage,
+				    "Ontology evaluation error",
+				    JOptionPane.ERROR_MESSAGE);
+		});
 	}
 }
