@@ -44,7 +44,7 @@ public class OOPSEvaluator {
     		+ "    <OutputFormat></OutputFormat>"
     		+ "</OOPSRequest>";
     
-    private static final int OOPS_WS_TIMEOUT = 5 * 1000; // set OOPS! WS timeout to 30s
+    private static final int OOPS_WS_TIMEOUT = 30 * 1000; // set OOPS! WS timeout to 30s
 
     private static OWLOntology activeOntology;
     
