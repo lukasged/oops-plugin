@@ -1,6 +1,7 @@
 package oops.evaluation;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -9,19 +10,22 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.rdf.rdfxml.renderer.RDFXMLRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
-
-import org.semanticweb.owlapi.rdf.rdfxml.renderer.RDFXMLRenderer;
 
 /**
  * Author: Lukas Gedvilas<br>
@@ -41,10 +45,21 @@ public class OOPSEvaluator {
     		+ "    <OntologyURI></OntologyURI>"
     		+ "    <OntologyContent><![CDATA[ %s ]]></OntologyContent>"
     		+ "    <Pitfalls></Pitfalls>"
-    		+ "    <OutputFormat></OutputFormat>"
+    		+ "    <OutputFormat>XML</OutputFormat>"
     		+ "</OOPSRequest>";
     
     private static final int OOPS_WS_TIMEOUT = 30 * 1000; // set OOPS! WS timeout to 30s
+    
+	private static final String OOPS_XML_PREFIX = "oops:";
+	private static final String OOPS_TAG_RESPONSE = OOPS_XML_PREFIX + "OOPSResponse";
+	private static final String OOPS_TAG_PITFALL = OOPS_XML_PREFIX + "Pitfall";
+	private static final String OOPS_TAG_NAME = OOPS_XML_PREFIX + "Name";
+	private static final String OOPS_TAG_CODE = OOPS_XML_PREFIX + "Code";
+	private static final String OOPS_TAG_DESCRIPTION = OOPS_XML_PREFIX + "Description";
+	private static final String OOPS_TAG_IMPORTANCE = OOPS_XML_PREFIX + "Importance";
+	private static final String OOPS_TAG_NUMBER_AFFECTED_ELEMS = OOPS_XML_PREFIX + "NumberAffectedElements";
+	private static final String OOPS_TAG_AFFECTS = OOPS_XML_PREFIX + "Affects";
+	private static final String OOPS_TAG_AFFECTED_ELEM = OOPS_XML_PREFIX + "AffectedElement";
 
     private static OWLOntology activeOntology;
     
@@ -54,13 +69,14 @@ public class OOPSEvaluator {
     
     private static EvaluationResult evaluationResults = null;
     
+    /**
+     * A runnable task that completes the ontology evaluation process using the OOPS! Web Service
+     */
     private static Runnable evaluationTask = () -> {
     	listeners.forEach(l -> l.onEvaluationStarted()); // notify all listeners about evaluation start
     	
     	Instant startInstant = Instant.now();
     	logger.info(String.format("evaluationTask[OOPSEvaluator] in thread %s", Thread.currentThread().getName()));
-    	
-		HashMap<String, ArrayList<Pitfall>> detectedPitfalls = new HashMap<String, ArrayList<Pitfall>>();
 		
 		activeOntology.getOWLOntologyManager();
 		
@@ -78,21 +94,7 @@ public class OOPSEvaluator {
 			
 			logger.info("The oopsResponse is -> " + oopsResponse);
 			
-			detectedPitfalls.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#Pizza",
-					new ArrayList<Pitfall>(
-							Arrays.asList(new Pitfall(PitfallImportanceLevel.IMPORTANT, "P1", "P1 is about bla bla"),
-									new Pitfall(PitfallImportanceLevel.CRITICAL, "P3", "P3 must be avoided!"),
-									new Pitfall(PitfallImportanceLevel.CRITICAL, "P9", "P9 is unacceptable!"))));
-
-			detectedPitfalls.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#Spiciness",
-					new ArrayList<Pitfall>(
-							Arrays.asList(new Pitfall(PitfallImportanceLevel.MINOR, "P2", "Missing annotations..."),
-									new Pitfall(PitfallImportanceLevel.IMPORTANT, "P8",
-											"The ontology lacks information about equivalent properties "
-													+ "(owl:equivalentProperty) in the cases of duplicated "
-													+ "relationships and/or attributes."))));
-	        
-	        evaluationResults = new EvaluationResult(detectedPitfalls);
+			evaluationResults = getResultsFromResponse(oopsResponse);
 	        
 	        logger.info(String.format("evaluationTask[OOPSEvaluator] finished in %d seconds", 
 					Duration.between(startInstant, Instant.now()).getSeconds()));
@@ -102,7 +104,7 @@ public class OOPSEvaluator {
 			logger.error(e.getLocalizedMessage());
 			listeners.forEach(l -> l.OnEvaluationException(e));
 		}
-    };     
+    };
 	
 	/**
 	 * Returns an OOPSEvaluator singleton instance
@@ -117,6 +119,14 @@ public class OOPSEvaluator {
 		return instance;
 	}
 	
+	/**
+	 * Send the required message to OOPS! WS endpoint and returns its response
+	 * 
+	 * @param oopsRequestBody
+	 *            the message to send
+	 * @return the response text
+	 * @throws Exception
+	 */
 	private static String sendOOPSRequest(String oopsRequestBody) throws Exception {
 		HttpURLConnection connection = (HttpURLConnection) new URL(OOPS_WS_ENDPOINT).openConnection();
 		connection.setRequestMethod("POST");
@@ -144,6 +154,69 @@ public class OOPSEvaluator {
 		} else {
 			throw new Exception("The OOPS! web service request has failed with status code " + responseCode);
 		}
+	}
+	
+	/**
+	 * Parses the OOPS! WS response and returns the organised results
+	 * 
+	 * @param oopsResponse
+	 *            the response from the OOPS! WebService
+	 * @return OOPS! WS results
+	 * @throws Exception
+	 */
+	private static EvaluationResult getResultsFromResponse(String oopsResponse) throws Exception {
+		DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		
+		Document doc = dBuilder.parse(new ByteArrayInputStream(oopsResponse.getBytes()));
+		doc.getDocumentElement().normalize();
+		
+		Element parsedResponse = (Element) doc.getElementsByTagName(OOPS_TAG_RESPONSE).item(0);
+		
+		NodeList pitfallsList = parsedResponse.getElementsByTagName(OOPS_TAG_PITFALL);
+		
+		HashMap<String, ArrayList<Pitfall>> detectedPitfalls = new HashMap<String, ArrayList<Pitfall>>();
+		
+		if (pitfallsList.getLength() == 0) {
+			logger.info("There are no pitfalls!");
+		} else {
+			logger.info(String.format("There are %d pitfalls!  -->>", pitfallsList.getLength()));
+			for (int i = 0; i < pitfallsList.getLength(); i++) {
+				Element pitfall = (Element) pitfallsList.item(i);
+				Node pitfallDescriptionNode = pitfall.getElementsByTagName(OOPS_TAG_DESCRIPTION).item(0);
+				Node pitfallCodeNode = pitfall.getElementsByTagName(OOPS_TAG_CODE).item(0);
+				Node pitfallNameNode = pitfall.getElementsByTagName(OOPS_TAG_NAME).item(0);
+				Node pitfallImportanceNode = pitfall.getElementsByTagName(OOPS_TAG_IMPORTANCE).item(0);
+				Node pitfallNumberAffectedElemsNode = pitfall.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
+				Element pitfallAffectsElement = (Element) pitfall.getElementsByTagName(OOPS_TAG_AFFECTS).item(0);
+
+				String pitfallDescription = pitfallDescriptionNode.getTextContent();
+				String pitfallCode = pitfallCodeNode.getTextContent();
+				String pitfallName = pitfallNameNode.getTextContent();
+				String pitfallImportance = pitfallImportanceNode.getTextContent();
+				
+				NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+				for (int j = 0; j < affectedElements.getLength(); j++) {
+					Node affectedElement = affectedElements.item(j);
+					String affectedElementIRI = affectedElement.getTextContent();
+					logger.info(String.format("The pitfall for elem <%s> : [%s][%s] - (%s) -> Description : %s",
+							affectedElementIRI, pitfallCode, pitfallImportance, pitfallName, pitfallDescription));
+					if (!detectedPitfalls.containsKey(affectedElementIRI)) {
+						detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+					}
+					
+					detectedPitfalls.get(affectedElementIRI).add(
+							new Pitfall(
+									PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+									pitfallName,
+									pitfallCode, 
+									pitfallDescription));
+				}
+			}
+		}
+        
+        evaluationResults = new EvaluationResult(detectedPitfalls);
+        
+        return evaluationResults;
 	}
 
 	/**

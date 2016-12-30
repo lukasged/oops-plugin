@@ -1,8 +1,6 @@
 package oops.ui;
 
 import java.awt.FlowLayout;
-import java.io.IOException;
-
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -30,6 +28,10 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	private static final String LIST_PITFALLS_BUTTON_TOOLTIP = "Lists all the detected pitfalls for the active ontology in a popup window";
 	private static final String CONFIG_OPTIONS_BUTTON_LABEL = "Configure";
 	private static final String CONFIG_OPTIONS_BUTTON_TOOLTIP = "Configure the options for the evaluation";
+	
+	private static final String EVALUATION_ERROR_MSG = "There has been an error while contacting OOPS! Web Service\n\n" +
+			"The error may be caused by your internet connectivity or the OOPS! service is unavailable.";
+	private static final String EVALUATION_ERROR_TITLE = "Ontology evaluation error";
 	
 	private OOPSEvaluator evaluator;
 	
@@ -92,13 +94,11 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	@Override
 	public void OnEvaluationException(Throwable exception) {
 		evaluatingDialog.setVisible(false);
-		final String errorMessage = "There has been an error while contacting OOPS! Web Service\n\n" +
-					"The error may be caused by your internet connectivity or the OOPS! service is unavailable.";
 		
 		SwingUtilities.invokeLater(() -> {
 			JOptionPane.showMessageDialog(null,
-					errorMessage,
-				    "Ontology evaluation error",
+					EVALUATION_ERROR_MSG,
+				    EVALUATION_ERROR_TITLE,
 				    JOptionPane.ERROR_MESSAGE);
 		});
 	}

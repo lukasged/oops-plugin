@@ -7,8 +7,6 @@ import org.protege.editor.core.util.HandlerRegistration;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
-import org.protege.editor.owl.ui.renderer.OWLSystemColors;
-import org.protege.editor.owl.ui.util.NothingSelectedPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.EntityBannerFormatter;
 import org.protege.editor.owl.ui.view.EntityBannerFormatterImpl;
@@ -22,22 +20,14 @@ import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
 
-import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 
 /**
@@ -85,27 +75,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     
     private OOPSEvaluator evaluator;
     
-    private EvaluationResult evaluationResult;
-    
-    private Runnable evaluationTask = () -> {
-    	Instant startInstant = Instant.now();
-    	logger.info(String.format("evaluationTask[PitfallsListComp] in thread %s", Thread.currentThread().getName()));
-    	
-    	pitfallsTree.setEnabled(false); // disable the pitfalls tree while evaluating
-    	
-    	try {
-			evaluator.evaluate(getOWLEditorKit().getOWLModelManager().getActiveOntology());
-			
-			logger.info(String.format("evaluationTask[PitfallsListComp] finished in %d seconds", 
-					Duration.between(startInstant, Instant.now()).getSeconds()));
-			logger.info("DetectedPitfallsListComponent came back from evaluation!!");
-		} catch (InterruptedException e) {
-			logger.error("There has been an error while trying to evaluate the ontology");
-			logger.error(e.getLocalizedMessage());
-		} finally {
-			pitfallsTree.setEnabled(true); // re-enable the pitfalls tree after evaluation
-		}
-    };    
+    private EvaluationResult evaluationResult;   
 
     protected void initialiseOWLView() throws Exception {
         setLayout(new BorderLayout());
@@ -272,15 +242,15 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     				switch (pitfall.getImportanceLevel()) {
     				case MINOR:
     					minor.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getDescription())));
+    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
     					break;
     				case IMPORTANT:
     					important.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getDescription())));
+    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
     					break;
     				case CRITICAL:
     					critical.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getDescription())));
+    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
     					break;
     				}
     			}
