@@ -207,8 +207,8 @@ public class OOPSEvaluator {
 					detectedPitfalls.get(affectedElementIRI).add(
 							new Pitfall(
 									PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+									pitfallCode,
 									pitfallName,
-									pitfallCode, 
 									pitfallDescription));
 				}
 			}
