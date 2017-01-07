@@ -47,7 +47,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     private static final String EVALUATION_PENDING_PANEL_LABEL = "Evaluate the ontology to see its pitfalls";
     
     private static final String PITFALLS_PANEL_ID = "Pitfalls";
-    private static final String PITFALLS_PANEL_LABEL = "Detected pitfalls for the selected element";
     
     private static final String INITIAL_ROOT_NOTE_TEXT = "Evaluate the ontology to see its pitfalls";
 
@@ -67,6 +66,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
     protected void initialiseOWLView() throws Exception {
         setLayout(new BorderLayout());
+        
         pitfallsListLabel = new JLabel();
         pitfallsListLabel.setBorder(BorderFactory.createEmptyBorder(1, 4, 3, 0));
         add(pitfallsListLabel, BorderLayout.NORTH);
@@ -152,7 +152,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         if (evaluationResult != null) {
         	String selectedEntityIRI = selEntity.getIRI().toString();
-            pitfallsListLabel.setText(PITFALLS_PANEL_LABEL);
             
             DefaultMutableTreeNode top = new DefaultMutableTreeNode();
             DefaultMutableTreeNode minor = new DefaultMutableTreeNode("Minor (0 items)");
@@ -231,10 +230,17 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 		
 		evaluationResult = result;
 		
+        int minorPitfalls = evaluationResult.getNumberOfPitfalls(PitfallImportanceLevel.MINOR);
+        int importantPitfalls = evaluationResult.getNumberOfPitfalls(PitfallImportanceLevel.IMPORTANT);
+        int criticalPitfalls = evaluationResult.getNumberOfPitfalls(PitfallImportanceLevel.CRITICAL);
+		
 		try {
 			SwingUtilities.invokeAndWait(() -> {
 				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
 				selectionChanged(); // update view with the selected element
+				
+				pitfallsListLabel.setText(String.format("Detected pitfalls (total %d critical, %d important, %d minor)",
+	            		criticalPitfalls, importantPitfalls, minorPitfalls));
 			});
 		} catch (InvocationTargetException | InterruptedException e) {
 			logger.error(e.getLocalizedMessage());

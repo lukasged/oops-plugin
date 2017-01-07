@@ -29,5 +29,14 @@ public class EvaluationResult {
     public ArrayList<Pitfall> getPitfallsForOWLEntity(String entityURI) {
         return detectedPitfalls.get(entityURI);
     }
+    
+    public int getNumberOfPitfalls(PitfallImportanceLevel importance) {   	
+    	long pitfallsCount = detectedPitfalls.values().stream()
+    		.flatMap(x -> x.stream())
+    		.filter(p -> p.getImportanceLevel() == importance)
+    		.count();
+    	
+    	return (int)pitfallsCount;
+    }
 
 }
