@@ -1,15 +1,11 @@
 package oops.ui;
 
 import org.protege.editor.core.ui.util.Resettable;
-import org.protege.editor.core.ui.view.ViewsPane;
-import org.protege.editor.core.ui.view.ViewsPaneMemento;
 import org.protege.editor.core.util.HandlerRegistration;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.protege.editor.owl.ui.view.EntityBannerFormatter;
-import org.protege.editor.owl.ui.view.EntityBannerFormatterImpl;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +18,11 @@ import oops.model.PitfallImportanceLevel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -45,29 +40,22 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
     private final JPanel cardPanel = new JPanel();
 
-    private final List<ViewsPane> viewsPanes = new ArrayList<>();
-
-    private static final String CLASSES_PANEL = "Classes";
-
-    private static final String OBJECT_PROPERTIES_PANEL = "ObjectProperties";
-
-    private static final String DATA_PROPERTIES_PANEL = "DataProperties";
-
-    private static final String ANNOTATION_PROPERTIES_PANEL = "AnnotationProperties";
-
-    private static final String INDIVIDUALS_PANEL = "Individual";
-
-    private static final String DATATYPES_PANEL = "Datatypes";
-
-    private static final String BLANK_PANEL = "Blank";
+    private static final String BLANK_PANEL_ID = "Blank";
+    private static final String BLANK_PANEL_LABEL = "Select an element to see its pitfalls";
     
-    private static final String INITIAL_ROOT_NOTE_TEXT = "Pitfalls (evaluate the ontology to see its pitfalls)";
+    private static final String EVALUATION_PENDING_PANEL_ID = "Evaluation_pending";
+    private static final String EVALUATION_PENDING_PANEL_LABEL = "Evaluate the ontology to see its pitfalls";
+    
+    private static final String PITFALLS_PANEL_ID = "Pitfalls";
+    private static final String PITFALLS_PANEL_LABEL = "Detected pitfalls for the selected element";
+    
+    private static final String INITIAL_ROOT_NOTE_TEXT = "Evaluate the ontology to see its pitfalls";
 
     private static final Logger logger = LoggerFactory.getLogger(IndividualPitfallsListComponent.class);
 
-    private JLabel entityIRILabel;
-
-    private EntityBannerFormatter entityBannerFormatter;
+    private JLabel pitfallsListLabel;
+    
+    private JPanel selectedItemPitfallsCard;
     
     private JTree pitfallsTree;
     
@@ -79,24 +67,31 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
     protected void initialiseOWLView() throws Exception {
         setLayout(new BorderLayout());
-        entityBannerFormatter = new EntityBannerFormatterImpl();
-        entityIRILabel = new JLabel();
-        entityIRILabel.setBorder(BorderFactory.createEmptyBorder(1, 4, 3, 0));
-        add(entityIRILabel, BorderLayout.NORTH);
+        pitfallsListLabel = new JLabel();
+        pitfallsListLabel.setBorder(BorderFactory.createEmptyBorder(1, 4, 3, 0));
+        add(pitfallsListLabel, BorderLayout.NORTH);
         
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(INITIAL_ROOT_NOTE_TEXT);
+        selectedItemPitfallsCard = new JPanel();
+        selectedItemPitfallsCard.setLayout(new BorderLayout());
+        
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode();
+        DefaultMutableTreeNode evalMessage = new DefaultMutableTreeNode(INITIAL_ROOT_NOTE_TEXT);
+        top.add(evalMessage);
         
         pitfallsTree = new JTree(top);
+        pitfallsTree.setRootVisible(false); // hide the root node
+        pitfallsTree.setCellRenderer(new TreeCellRendererWithTooltip()); // enable custom CellRenderer
         pitfallsTreeView = new JScrollPane(pitfallsTree);
         
-        add(pitfallsTreeView);
+        selectedItemPitfallsCard.add(pitfallsTreeView, BorderLayout.CENTER);
         
-        //add(cardPanel);
-        //cardPanel.setLayout(cardLayout);
-        //cardPanel.add(new NothingSelectedPanel(), BLANK_PANEL);
-        //createViewPanes(false);
-        //logger.info("DetectedPitfallsListComponent adding listener!!");
-        //OOPSEvaluator.addListener(this);
+        add(cardPanel, BorderLayout.CENTER);
+        cardPanel.setLayout(cardLayout);
+        
+        cardPanel.add(new CenteredMessagePanel(EVALUATION_PENDING_PANEL_LABEL), EVALUATION_PENDING_PANEL_ID);
+        cardPanel.add(new CenteredMessagePanel(BLANK_PANEL_LABEL), BLANK_PANEL_ID);
+        
+        cardPanel.add(selectedItemPitfallsCard, PITFALLS_PANEL_ID);
         
         evaluator = OOPSEvaluator.getInstance();
         
@@ -107,67 +102,11 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         selectionChanged();
     }
 
-    private void createViewPanes(boolean reset) {
-        addPane(CLASSES_PANEL,
-                "/selected-entity-view-class-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.classes",
-                reset);
-
-
-        addPane(OBJECT_PROPERTIES_PANEL,
-                "/selected-entity-view-objectproperty-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.objectproperties",
-                reset);
-
-
-        addPane(DATA_PROPERTIES_PANEL,
-                "/selected-entity-view-dataproperty-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.dataproperties",
-                reset);
-
-
-        addPane(ANNOTATION_PROPERTIES_PANEL,
-                "/selected-entity-view-annotationproperty-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.annotproperties",
-                reset);
-
-
-        addPane(INDIVIDUALS_PANEL,
-                "/selected-entity-view-individual-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.individuals",
-                reset);
-
-
-        addPane(DATATYPES_PANEL,
-                "/selected-entity-view-datatype-panel.xml",
-                "org.protege.editor.owl.ui.view.selectedentityview.datatypes",
-                reset);
-    }
-
-
-    private void addPane(String panelId, String configFile, String viewPaneId, boolean reset) {
-        URL clsURL = getClass().getResource(configFile);
-        ViewsPane pane = new ViewsPane(getOWLWorkspace(), new ViewsPaneMemento(clsURL, viewPaneId, reset));
-        cardPanel.add(pane, panelId);
-        viewsPanes.add(pane);
-    }
-
 
     public void reset() {
-        for (ViewsPane pane : viewsPanes){
-            cardPanel.remove(pane);
-            pane.dispose();
-        }
-
-        viewsPanes.clear();
         pitfallsTree.removeAll();
-        entityIRILabel.setText("");
-        createViewPanes(true);
+        pitfallsListLabel.setText("");
         validate();
-
-        for (ViewsPane pane : viewsPanes){
-            pane.saveViews();
-        }
         
         logger.info("IndividualPitfallsListComponent received reset event!!");
     }
@@ -177,11 +116,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     }
 
     protected void disposeOWLView() {
-        for (ViewsPane pane : viewsPanes){
-            pane.saveViews();
-            pane.dispose();
-        }
-        
         evaluator.removeListener(this);
     }
 
@@ -201,23 +135,26 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 	public void selectionChanged() {
         OWLObject selectedObject = getOWLWorkspace().getOWLSelectionModel().getSelectedObject();
         if(selectedObject == null) {
-            entityIRILabel.setIcon(null);
-            entityIRILabel.setText("");
-            entityIRILabel.setBackground(null);
-            //selectPanel(BLANK_PANEL);
+            pitfallsListLabel.setIcon(null);
+            pitfallsListLabel.setText("");
+            pitfallsListLabel.setBackground(null);
+            selectPanel((evaluationResult != null) ? BLANK_PANEL_ID : EVALUATION_PENDING_PANEL_ID);
             return;
         }
+        
         if(!(selectedObject instanceof OWLEntity)) {
             return;
         }
+        
+        selectPanel((evaluationResult != null) ? PITFALLS_PANEL_ID : EVALUATION_PENDING_PANEL_ID);
+        
         OWLEntity selEntity = (OWLEntity) selectedObject;
-        String selectedEntityIRI = selEntity.getIRI().toString();
-        String banner = entityBannerFormatter.formatBanner(selEntity, getOWLEditorKit());
-        entityIRILabel.setIcon(getOWLWorkspace().getOWLIconProvider().getIcon(selEntity));
-        entityIRILabel.setText(banner);
         
         if (evaluationResult != null) {
-            DefaultMutableTreeNode top = new DefaultMutableTreeNode("Pitfalls");
+        	String selectedEntityIRI = selEntity.getIRI().toString();
+            pitfallsListLabel.setText(PITFALLS_PANEL_LABEL);
+            
+            DefaultMutableTreeNode top = new DefaultMutableTreeNode();
             DefaultMutableTreeNode minor = new DefaultMutableTreeNode("Minor (0 items)");
             DefaultMutableTreeNode important = new DefaultMutableTreeNode("Important (0 items)");
             DefaultMutableTreeNode critical = new DefaultMutableTreeNode("Critical (0 items)");
@@ -225,14 +162,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             top.add(minor);
             top.add(important);
             top.add(critical);
-            
-            logger.info(String.format("In processSelections now ...\n evalResult %s null!", evaluationResult == null ? "is" : "isn't"));
-            logger.info("selectedEntityIRI -> " + selectedEntityIRI);
-            logger.info("evaluationResult -> " + evaluationResult.toString());
-            if (evaluationResult != null && evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI) != null) {
-                logger.info("getPitfallsForOWLEntity -> " + evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI).toString());
-                logger.info("number of pitfalls -> " + evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI).size());
-            }
             
             ArrayList<Pitfall> detectedPitfalls = evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI);
             
@@ -242,15 +171,15 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     				switch (pitfall.getImportanceLevel()) {
     				case MINOR:
     					minor.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
+    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getName())));
     					break;
     				case IMPORTANT:
     					important.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
+    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getName())));
     					break;
     				case CRITICAL:
     					critical.add(new DefaultMutableTreeNode(
-    							String.format("%s - %s\n%s", pitfall.getPitfallID(), pitfall.getName(), pitfall.getDescription())));
+    							String.format("%s - %s", pitfall.getPitfallID(), pitfall.getName())));
     					break;
     				}
     			}
@@ -271,6 +200,17 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         }
         
 	}
+	
+    private static class TreeCellRendererWithTooltip extends DefaultTreeCellRenderer {
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value,
+                boolean sel, boolean expanded, boolean leaf, int row,
+                boolean hasFocus) {
+            setToolTipText("foobar" + row);
+            return super.getTreeCellRendererComponent(tree, value, sel,
+                    expanded, leaf, row, hasFocus);
+        }
+    }
 
 	@Override
 	public void onEvaluationStarted() {
