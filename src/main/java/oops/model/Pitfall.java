@@ -6,7 +6,7 @@ package oops.model;
  *
  * Data Model for ontological pitfalls.
  */
-public class Pitfall {
+public class Pitfall implements Comparable<Pitfall> {
 	private PitfallImportanceLevel importanceLevel;
 	private String pitfallID;
 	private String name;
@@ -82,5 +82,27 @@ public class Pitfall {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+	    if (other == this) return true;
+	    if (!(other instanceof Pitfall)) return false;
+	    Pitfall otherPitfall = (Pitfall)other;
+		return this.importanceLevel == otherPitfall.importanceLevel && 
+				this.description.equals(otherPitfall.description) &&
+				this.name.equals(otherPitfall.name) &&
+				this.pitfallID.equals(otherPitfall.pitfallID);
+	}
+	
+	@Override
+	public int hashCode() {
+		return description.hashCode();
+	}
+	
+	@Override
+	public int compareTo(Pitfall otherPitfall) {
+		return this.pitfallID.compareTo(otherPitfall.pitfallID);
 	}
 }
