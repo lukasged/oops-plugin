@@ -47,8 +47,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     private static final String EVALUATION_PENDING_PANEL_LABEL = "Evaluate the ontology to see its pitfalls";
     
     private static final String PITFALLS_PANEL_ID = "Pitfalls";
-    
-    private static final String INITIAL_ROOT_NOTE_TEXT = "Evaluate the ontology to see its pitfalls";
 
     private static final Logger logger = LoggerFactory.getLogger(IndividualPitfallsListComponent.class);
 
@@ -74,11 +72,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         selectedItemPitfallsCard = new JPanel();
         selectedItemPitfallsCard.setLayout(new BorderLayout());
         
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode();
-        DefaultMutableTreeNode evalMessage = new DefaultMutableTreeNode(INITIAL_ROOT_NOTE_TEXT);
-        top.add(evalMessage);
-        
-        pitfallsTree = new JTree(top);
+        pitfallsTree = new JTree();
         pitfallsTree.setRootVisible(false); // hide the root node
         pitfallsTree.setCellRenderer(new TreeCellRendererWithTooltip()); // enable custom CellRenderer
         pitfallsTreeView = new JScrollPane(pitfallsTree);

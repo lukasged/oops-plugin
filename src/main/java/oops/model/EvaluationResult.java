@@ -1,7 +1,9 @@
 package oops.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Author: Lukas Gedvilas<br>
@@ -38,5 +40,24 @@ public class EvaluationResult {
     	
     	return (int)pitfallsCount;
     }
-
+    
+    public HashMap<String, ArrayList<Pitfall>> detectedPitfalls() {
+    	return detectedPitfalls;
+    }
+    
+    public TreeMap<Pitfall, ArrayList<String>> pitfallsWithAffectedElements() {
+    	TreeMap<Pitfall, ArrayList<String>> pitfallsWithAffectedElements = new TreeMap<Pitfall, ArrayList<String>>();
+    	
+    	detectedPitfalls.forEach((element,pitfalls) -> {
+    		pitfalls.forEach(p -> {
+    			if (pitfallsWithAffectedElements.containsKey(p)) {
+    				pitfallsWithAffectedElements.get(p).add(element); // merge with the elements list
+    			} else {
+    				pitfallsWithAffectedElements.put(p, new ArrayList<>(Arrays.asList(element))); // add first element
+    			}
+    		});
+    	});
+    	
+    	return pitfallsWithAffectedElements;
+    }
 }
