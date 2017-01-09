@@ -18,6 +18,15 @@ public class EvaluationResult {
         this.detectedPitfalls = detectedPitfalls;
     }
     
+	/**
+	 * Checks the pitfalls for the specified OWL entity and returns the highest
+	 * importance level encountered
+	 * 
+	 * @param entityURI
+	 *            the OWL entity to check
+	 * @return the pitfalls for the specified OWL entity and returns the highest
+	 *         importance level encountered
+	 */
     public PitfallImportanceLevel getHighestImportanceLevelForEntity(String entityURI) {
         ArrayList<Pitfall> pitfalls = detectedPitfalls.get(entityURI);
         
@@ -28,19 +37,40 @@ public class EvaluationResult {
         }
     }
     
+	/**
+	 * Gets the detected pitfalls for the specified OWL entity
+	 * 
+	 * @param entityURI
+	 *            the entity whose pitfalls are to be checked
+	 * @return the detected pitfalls for the specified OWL entity
+	 */
     public ArrayList<Pitfall> getPitfallsForOWLEntity(String entityURI) {
         return detectedPitfalls.get(entityURI);
     }
     
-    public int getNumberOfPitfalls(PitfallImportanceLevel importance) {   	
-    	long pitfallsCount = detectedPitfalls.values().stream()
-    		.flatMap(x -> x.stream())
-    		.filter(p -> p.getImportanceLevel() == importance)
-    		.count();
-    	
-    	return (int)pitfallsCount;
-    }
+	/**
+	 * Gets the number of pitfalls from the results that are of the specified
+	 * importance level
+	 * 
+	 * @param importance
+	 *            the importance level filter
+	 * @return the number of pitfalls from the results that are of the specified
+	 *         importance level
+	 */
+	public int getNumberOfPitfalls(PitfallImportanceLevel importance) {
+		long pitfallsCount = detectedPitfalls.values().stream()
+				.flatMap(x -> x.stream())
+				.filter(p -> p.getImportanceLevel() == importance)
+				.count();
+
+		return (int) pitfallsCount;
+	}
     
+	/**
+	 * Returns the detected pitfalls map
+	 * 
+	 * @return the detected pitfalls map
+	 */
     public HashMap<String, ArrayList<Pitfall>> detectedPitfalls() {
     	return detectedPitfalls;
     }
