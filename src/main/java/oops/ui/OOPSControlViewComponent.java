@@ -111,7 +111,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			pitfallsListDialog.setTitle(LIST_PITFALLS_DIALOG_TITLE);
 			pitfallsListDialog.setModalityType((JDialog.ModalityType.APPLICATION_MODAL));
 			pitfallsListDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			pitfallsListDialog.setSize(new Dimension(600,250));
+			pitfallsListDialog.setSize(new Dimension(800,250));
 			pitfallsListDialog.setLocationRelativeTo(null);
 			
 			JPanel contentPane = new JPanel();
@@ -169,6 +169,49 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
 									+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
 						}
+						break;
+					case OOPSEvaluator.PITFALL_MIGHT_BE_EQUIVALENT_ID:
+						ArrayList<ElementPair> equivalentProperties = evaluationResult.getEquivalentRelations();
+						ArrayList<ElementPair> equivalentAttributes = evaluationResult.getEquivalentAttributes();
+						
+						if (equivalentProperties.size() > 0) {
+							pitfallText += "<p>The following relations could be defined as equivalent:</p>";
+							
+							for (ElementPair pair : equivalentProperties) {
+								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
+										+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+							}
+						}
+						
+						if (equivalentAttributes.size() > 0) {
+							pitfallText += "<br><p>The following attributes could be defined as equivalent:</p>";
+							
+							for (ElementPair pair : equivalentAttributes) {
+								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
+										+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+							}
+						}
+
+						break;
+					case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
+						ArrayList<ElementPair> mightBeInverseRelations = evaluationResult.getMightBeInverseRelations();
+						
+						for (ElementPair pair : mightBeInverseRelations) {
+							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
+									"</a> could be inverse of <a href=" + pair.getElementB() + ">" +
+									pair.getElementB() + "</a>" + "</p>";
+						}
+						
+						break;
+					case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
+						ArrayList<ElementPair> wrongInverseRelations = evaluationResult.getWrongInverseRelations();
+						
+						for (ElementPair pair : wrongInverseRelations) {
+							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
+									"</a> may not be inverse of <a href=" + pair.getElementB() + ">" + 
+									pair.getElementB() + "</a>" + "</p>";
+						}
+						
 						break;
 					default:
 						pitfallText += "<p>This pitfall appears in the following elements:</p>";

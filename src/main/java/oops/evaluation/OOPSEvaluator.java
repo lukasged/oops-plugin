@@ -209,13 +209,14 @@ public class OOPSEvaluator {
 				String pitfallImportance = pitfallImportanceNode.getTextContent();
 				int pitfallNumAffectedElems = Integer.parseInt(pitfallNumAffectedElemsNode.getTextContent());
 				
-				if (pitfallCode.equals(PITFALL_EQUIVALENT_CLASSES_ID)) {
-					NodeList mightBeEquivalentList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_EQUIVALENT_CLASSES);
+				switch (pitfallCode) {
+				case PITFALL_EQUIVALENT_CLASSES_ID:
+					NodeList mightBeEquivalentClassList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_EQUIVALENT_CLASSES);
 					
 					ArrayList<ElementPair> equivalentClasses = new ArrayList<ElementPair>();
 					
-					for (int j = 0; j < mightBeEquivalentList.getLength(); j++) {
-						Element mightBeEquivalentNode = (Element) mightBeEquivalentList.item(j);
+					for (int j = 0; j < mightBeEquivalentClassList.getLength(); j++) {
+						Element mightBeEquivalentNode = (Element) mightBeEquivalentClassList.item(j);
 						
 						NodeList equivalentClassesNodes = mightBeEquivalentNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
 						String equivalent1 = equivalentClassesNodes.item(0).getFirstChild().getNodeValue();
@@ -239,7 +240,136 @@ public class OOPSEvaluator {
 					}
 					
 					evaluationResults.setEquivalentClasses(equivalentClasses);
-				} else {
+					break;
+				case PITFALL_MIGHT_BE_EQUIVALENT_ID:
+					NodeList mightBeEquivalentPropertyList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_EQUIVALENT_PROPERTY);
+					NodeList mightBeEquivalentAttributeList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_EQUIVALENT_ATTRIBUTE);
+					
+					ArrayList<ElementPair> equivalentProperties = new ArrayList<ElementPair>();
+					ArrayList<ElementPair> equivalentAttributes = new ArrayList<ElementPair>();
+					
+					for (int j = 0; j < mightBeEquivalentPropertyList.getLength(); j++) { // eq properties loop
+						Element mightBeEquivalentPropertyNode = (Element) mightBeEquivalentPropertyList.item(j);
+						
+						NodeList equivalentPropertyNodes = mightBeEquivalentPropertyNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = equivalentPropertyNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = equivalentPropertyNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						equivalentProperties.add(new ElementPair(equivalent1, equivalent2));
+					}
+					
+					for (int j = 0; j < mightBeEquivalentAttributeList.getLength(); j++) { // eq attributes loop
+						Element mightBeEquivalentAttributeNode = (Element) mightBeEquivalentAttributeList.item(j);
+						
+						NodeList equivalentAttributesNodes = mightBeEquivalentAttributeNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = equivalentAttributesNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = equivalentAttributesNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						equivalentAttributes.add(new ElementPair(equivalent1, equivalent2));
+					}
+					
+					if (equivalentProperties.size() > 0) {
+						evaluationResults.setEquivalentRelations(equivalentProperties);
+					}
+					
+					if (equivalentAttributes.size() > 0) {
+						evaluationResults.setEquivalentAttributes(equivalentAttributes);
+					}
+					
+					break;
+				case PITFALL_MIGHT_BE_INVERSE_ID:
+					NodeList mightBeInverseList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_MIGHT_BE_INVERSE);
+					
+					ArrayList<ElementPair> inverseRelations = new ArrayList<ElementPair>();
+					
+					for (int j = 0; j < mightBeInverseList.getLength(); j++) {
+						Element mightBeInverseNode = (Element) mightBeInverseList.item(j);
+						
+						NodeList inverseNodes = mightBeInverseNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = inverseNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = inverseNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						inverseRelations.add(new ElementPair(equivalent1, equivalent2));
+					}
+					
+					evaluationResults.setMightBeInverseRelations(inverseRelations);
+					
+					break;
+				case PITFALL_WRONG_INVERSE_ID:
+					NodeList wrongInverseList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_WRONG_INVERSE);
+					
+					ArrayList<ElementPair> wrongInverseRelations = new ArrayList<ElementPair>();
+					
+					for (int j = 0; j < wrongInverseList.getLength(); j++) {
+						Element wrongInverseNode = (Element) wrongInverseList.item(j);
+						
+						NodeList wrongInverseNodes = wrongInverseNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = wrongInverseNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = wrongInverseNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						wrongInverseRelations.add(new ElementPair(equivalent1, equivalent2));
+					}
+					
+					evaluationResults.setWrongInverseRelations(wrongInverseRelations);
+					
+					break;
+				default:
 					NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
 					for (int j = 0; j < affectedElements.getLength(); j++) {
 						Node affectedElement = affectedElements.item(j);
