@@ -41,17 +41,47 @@ import oops.model.Pitfall;
 public class OOPSControlViewComponent extends AbstractOWLViewComponent implements EvaluationListener{
 	private static final Logger logger = LoggerFactory.getLogger(OOPSControlViewComponent.class);
 	
-	private static final String EVALUATE_BUTTON_LABEL = "Evaluate";
-	private static final String EVALUATE_BUTTON_TOOLTIP = "Evaluates the ontology and marks its elements with pitfalls";
-	private static final String LIST_PITFALLS_BUTTON_LABEL = "Show all pitfalls";
-	private static final String LIST_PITFALLS_BUTTON_TOOLTIP = "Lists all the detected pitfalls for the active ontology in a popup window";
+	private static final String EVALUATE_BTN_LABEL = "Evaluate";
+	private static final String EVALUATE_BTN_TOOLTIP = "Evaluates the ontology and marks its elements with pitfalls";
+	private static final String LIST_PITFALLS_BTN_LABEL = "Show all pitfalls";
+	private static final String LIST_PITFALLS_BTN_TOOLTIP = "Lists all the detected pitfalls for the active ontology "
+			+ "in a popup window";
 	private static final String LIST_PITFALLS_DIALOG_TITLE = "All detected pitfalls";
-	private static final String CONFIG_OPTIONS_BUTTON_LABEL = "Configure";
-	private static final String CONFIG_OPTIONS_BUTTON_TOOLTIP = "Configure the options for the evaluation";
+	private static final String CONFIG_OPTIONS_BTN_LABEL = "Configure";
+	private static final String CONFIG_OPTIONS_BTN_TOOLTIP = "Configure the options for the evaluation";
 	
-	private static final String EVALUATION_ERROR_MSG = "There has been an error while contacting OOPS! Web Service\n\n" +
-			"The error may be caused by your internet connectivity or the OOPS! service is unavailable.";
+	private static final String EVALUATION_ERROR_MSG = "There has been an error while contacting OOPS! Web Service" +
+			"\n\nThe error may be caused by your internet connectivity or the OOPS! service is unavailable.";
 	private static final String EVALUATION_ERROR_TITLE = "Ontology evaluation error";
+	
+	private static final String OOPS_RESULTS_REFERENCES_TEXT = "<ul><li>[1]	Aguado-De Cea, G., Montiel-Ponsoda, "
+			+ "E., Poveda-Villalón, M., and Giraldo-Pasmin, O.X. (2015). Lexicalizing Ontologies: The issues behind "
+			+ "the labels. In Multimodal communication in the 21st century: Professional and academic challenges. "
+			+ "33rd Conference of the Spanish Association of Applied Linguistics (AESLA), XXXIII AESLA.</li>"
+			+ "<li>[2]	Noy, N. F., McGuinness, D. L., et al. (2001). Ontology development 101: A guide to creating "
+			+ "your first ontology.</li>"
+			+ "<li>[3]	Gómez-Pérez, A. (1999). Evaluation of Taxonomic Knowledge in Ontologies and Knowledge Bases. "
+			+ "Proceedings of the Banff Knowledge Acquisition for Knowledge-Based Systems Workshop. Alberta, Canada."
+			+ "</li><li>[4]	Montiel-Ponsoda, E., Vila Suero, D., Villazón-Terrazas, B., Dunsire, G., Escolano "
+			+ "Rodríguez, E., Gómez-Pérez, A. (2011). Style guidelines for naming and labeling ontologies in the "
+			+ "multilingual web.</li>"
+			+ "<li>[5]	Vrandecic, D. (2010). Ontology Evaluation. PhD thesis.</li>"
+			+ "<li>[6]	Gómez-Pérez, A. (2004). Ontology evaluation. In Handbook on ontologies, pages 251-273. "
+			+ "Springer.</li>"
+			+ "<li>[7]	Rector, A., Drummond, N., Horridge, M., Rogers, J., Knublauch, H., Stevens, R., "
+			+ "Wang, H., and Wroe, C. (2004). Owl pizzas: Practical experience of teaching owl-dl: Common errors "
+			+ "& common patterns. In Engineering Knowledge in the Age of the Semantic Web, pages 63-81. Springer.</li>"
+			+ "<li>[8]	Hogan, A., Harth, A., Passant, A., Decker, S., and Polleres, A. (2010). Weaving the pedantic "
+			+ "web. In Proceedings of the WWW2010 Workshop on Linked Data on the Web, LDOW 2010, Raleigh, USA, April "
+			+ "27, 2010.</li>"
+			+ "<li>[9]	Archer, P., Goedertier, S., and Loutas, N. (2012). D7. 1.3-study on persistent URIs, with iden"
+			+ "tification of best practices and recommendations on the topic for the Mss and the EC. PwC EU Services."
+			+ "</li><li>[10] Bernes-Lee Tim. (2006). “Linked Data - Design issues”. http://www.w3.org/DesignIssues/"
+			+ "LinkedData.html</li>"
+			+ "<li>[11] Heath, T. and Bizer, C. (2011). Linked Data: Evolving the Web into a Global Data Space. Morgan"
+			+ " & Claypool, 1st edition.</li>"
+			+ "<li>[12] Vatant, B. (2012). Is your linked data vocabulary 5-star?. http://bvatant.blogspot.fr/2012/02/"
+			+ "is-your-linked-data-vocabulary-5-star_9588.html</li></ul>";
 	
 	private static final int LIST_PITFALLS_BORDER_MARGIN = 30;
 	
@@ -75,15 +105,15 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		
 		evaluatingDialog = new EvaluationDialog();
 		
-		btnEvaluate = new JButton(EVALUATE_BUTTON_LABEL);
-		btnEvaluate.setToolTipText(EVALUATE_BUTTON_TOOLTIP);
+		btnEvaluate = new JButton(EVALUATE_BTN_LABEL);
+		btnEvaluate.setToolTipText(EVALUATE_BTN_TOOLTIP);
 		
-		btnListAllPitfalls = new JButton(LIST_PITFALLS_BUTTON_LABEL);
-		btnListAllPitfalls.setToolTipText(LIST_PITFALLS_BUTTON_TOOLTIP);
+		btnListAllPitfalls = new JButton(LIST_PITFALLS_BTN_LABEL);
+		btnListAllPitfalls.setToolTipText(LIST_PITFALLS_BTN_TOOLTIP);
 		btnListAllPitfalls.setEnabled(false); // disable until the evaluation is done
 		
-		btnConfigEval = new JButton(CONFIG_OPTIONS_BUTTON_LABEL);
-		btnConfigEval.setToolTipText(CONFIG_OPTIONS_BUTTON_TOOLTIP);
+		btnConfigEval = new JButton(CONFIG_OPTIONS_BTN_LABEL);
+		btnConfigEval.setToolTipText(CONFIG_OPTIONS_BTN_TOOLTIP);
 		btnConfigEval.setEnabled(false); // disable until it's implemented
 		
 		add(btnListAllPitfalls);
@@ -178,8 +208,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 							pitfallText += "<p>The following relations could be defined as equivalent:</p>";
 							
 							for (ElementPair pair : equivalentProperties) {
-								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
-										+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() +
+										"</a>, <a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a></p>";
 							}
 						}
 						
@@ -187,8 +217,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 							pitfallText += "<br><p>The following attributes could be defined as equivalent:</p>";
 							
 							for (ElementPair pair : equivalentAttributes) {
-								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
-										+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+								pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() +
+										"</a>, <a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a></p>";
 							}
 						}
 
@@ -221,6 +251,9 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 						}
 					}
 					
+					pitfallText += "<br><p>References:</p>";
+					pitfallText += OOPS_RESULTS_REFERENCES_TEXT;
+					
 					pitfallText += "</html>";
 					
 					JLabel pitfallDescriptionLabel = new JLabel(pitfallText);
@@ -240,7 +273,15 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					
 					contentPane.add(pitfallLabelHolder);
 					contentPane.add(pitfallDescriptionLabel);
-				});			
+				});
+				
+				JLabel referencesLabel = new JLabel(
+						"<html><p>References:</p>" + OOPS_RESULTS_REFERENCES_TEXT + "</html>");
+				referencesLabel.setMaximumSize(new Dimension(
+						(int) pitfallsListDialog.getSize().getWidth() - LIST_PITFALLS_BORDER_MARGIN * 3, 1000));
+				referencesLabel.setAlignmentX(LEFT_ALIGNMENT);
+				
+				contentPane.add(referencesLabel);
 			} else {
 				String noPitfallsText = "<html>" +
 											"<b>We haven't detected any pitfalls for your ontology</b><br><br>" +
