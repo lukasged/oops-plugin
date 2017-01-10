@@ -186,13 +186,14 @@ public class OOPSEvaluator {
 				Node pitfallCodeNode = pitfall.getElementsByTagName(OOPS_TAG_CODE).item(0);
 				Node pitfallNameNode = pitfall.getElementsByTagName(OOPS_TAG_NAME).item(0);
 				Node pitfallImportanceNode = pitfall.getElementsByTagName(OOPS_TAG_IMPORTANCE).item(0);
-				Node pitfallNumberAffectedElemsNode = pitfall.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
+				Node pitfallNumAffectedElemsNode = pitfall.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
 				Element pitfallAffectsElement = (Element) pitfall.getElementsByTagName(OOPS_TAG_AFFECTS).item(0);
 
 				String pitfallDescription = pitfallDescriptionNode.getTextContent();
 				String pitfallCode = pitfallCodeNode.getTextContent();
 				String pitfallName = pitfallNameNode.getTextContent();
 				String pitfallImportance = pitfallImportanceNode.getTextContent();
+				int pitfallNumAffectedElems = Integer.parseInt(pitfallNumAffectedElemsNode.getTextContent());
 				
 				NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
 				for (int j = 0; j < affectedElements.getLength(); j++) {
@@ -209,7 +210,8 @@ public class OOPSEvaluator {
 									PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
 									pitfallCode,
 									pitfallName,
-									pitfallDescription));
+									pitfallDescription,
+									pitfallNumAffectedElems));
 				}
 			}
 		}

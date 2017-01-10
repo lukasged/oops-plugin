@@ -150,7 +150,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					String capitalizedImportance = importanceLevel.charAt(0) +
 							importanceLevel.toLowerCase().substring(1, importanceLevel.length());
 					JLabel pitfallNumCasesLabel = new JLabel(
-							elements.size() + cases + " | " + capitalizedImportance);
+							p.getNumAffectedElements() + cases + " | " + capitalizedImportance);
 					pitfallNumCasesLabel.setFont(new Font("serif", Font.BOLD, 14));
 					
 					pitfallLabelHolder.add(pitfallNameLabel, BorderLayout.WEST);

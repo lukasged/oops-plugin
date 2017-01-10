@@ -11,12 +11,15 @@ public class Pitfall implements Comparable<Pitfall> {
 	private String pitfallID;
 	private String name;
 	private String description;
+	private int numAffectedElements;
 
-	public Pitfall(PitfallImportanceLevel importanceLevel, String pitfallID, String name, String description) {
+	public Pitfall(PitfallImportanceLevel importanceLevel, String pitfallID, String name, String description,
+			int numAffectedElements) {
 		this.importanceLevel = importanceLevel;
 		this.pitfallID = pitfallID;
 		this.name = name;
 		this.description = description;
+		this.numAffectedElements = numAffectedElements;
 	}
 
 	/**
@@ -84,6 +87,20 @@ public class Pitfall implements Comparable<Pitfall> {
 		this.name = name;
 	}
 	
+	/**
+	 * @return the numAffectedElements
+	 */
+	public int getNumAffectedElements() {
+		return numAffectedElements;
+	}
+
+	/**
+	 * @param numAffectedElements the numAffectedElements to set
+	 */
+	public void setNumAffectedElements(int numAffectedElements) {
+		this.numAffectedElements = numAffectedElements;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
