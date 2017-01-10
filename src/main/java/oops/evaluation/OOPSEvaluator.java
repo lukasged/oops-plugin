@@ -23,6 +23,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import oops.model.ElementPair;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
@@ -60,6 +62,16 @@ public class OOPSEvaluator {
 	private static final String OOPS_TAG_NUMBER_AFFECTED_ELEMS = OOPS_XML_PREFIX + "NumberAffectedElements";
 	private static final String OOPS_TAG_AFFECTS = OOPS_XML_PREFIX + "Affects";
 	private static final String OOPS_TAG_AFFECTED_ELEM = OOPS_XML_PREFIX + "AffectedElement";
+	private static final String OOPS_TAG_WRONG_INVERSE = OOPS_XML_PREFIX + "MightNotBeInverseOf";
+	private static final String OOPS_TAG_MIGHT_BE_INVERSE = OOPS_XML_PREFIX + "MightBeInverse";
+	private static final String OOPS_TAG_EQUIVALENT_PROPERTY = OOPS_XML_PREFIX + "MightBeEquivalentProperty";
+	private static final String OOPS_TAG_EQUIVALENT_ATTRIBUTE = OOPS_XML_PREFIX + "MightBeEquivalentAttribute";
+	private static final String OOPS_TAG_EQUIVALENT_CLASSES = OOPS_XML_PREFIX + "MightBeEquivalentClass";
+	
+	public static final String PITFALL_WRONG_INVERSE_ID = "P05";
+	public static final String PITFALL_MIGHT_BE_INVERSE_ID = "P13";
+	public static final String PITFALL_MIGHT_BE_EQUIVALENT_ID = "P12";
+	public static final String PITFALL_EQUIVALENT_CLASSES_ID = "P30";
 
     private static OWLOntology activeOntology;
     
@@ -176,6 +188,8 @@ public class OOPSEvaluator {
 		
 		HashMap<String, ArrayList<Pitfall>> detectedPitfalls = new HashMap<String, ArrayList<Pitfall>>();
 		
+		evaluationResults = new EvaluationResult();
+		
 		if (pitfallsList.getLength() == 0) {
 			logger.info("There are no pitfalls!");
 		} else {
@@ -195,28 +209,60 @@ public class OOPSEvaluator {
 				String pitfallImportance = pitfallImportanceNode.getTextContent();
 				int pitfallNumAffectedElems = Integer.parseInt(pitfallNumAffectedElemsNode.getTextContent());
 				
-				NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
-				for (int j = 0; j < affectedElements.getLength(); j++) {
-					Node affectedElement = affectedElements.item(j);
-					String affectedElementIRI = affectedElement.getTextContent();
-					logger.info(String.format("The pitfall for elem <%s> : [%s][%s] - (%s) -> Description : %s",
-							affectedElementIRI, pitfallCode, pitfallImportance, pitfallName, pitfallDescription));
-					if (!detectedPitfalls.containsKey(affectedElementIRI)) {
-						detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+				if (pitfallCode.equals(PITFALL_EQUIVALENT_CLASSES_ID)) {
+					NodeList mightBeEquivalentList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_EQUIVALENT_CLASSES);
+					
+					ArrayList<ElementPair> equivalentClasses = new ArrayList<ElementPair>();
+					
+					for (int j = 0; j < mightBeEquivalentList.getLength(); j++) {
+						Element mightBeEquivalentNode = (Element) mightBeEquivalentList.item(j);
+						
+						NodeList equivalentClassesNodes = mightBeEquivalentNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = equivalentClassesNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = equivalentClassesNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						equivalentClasses.add(new ElementPair(equivalent1, equivalent2));
 					}
 					
-					detectedPitfalls.get(affectedElementIRI).add(
-							new Pitfall(
-									PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
-									pitfallCode,
-									pitfallName,
-									pitfallDescription,
-									pitfallNumAffectedElems));
+					evaluationResults.setEquivalentClasses(equivalentClasses);
+				} else {
+					NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+					for (int j = 0; j < affectedElements.getLength(); j++) {
+						Node affectedElement = affectedElements.item(j);
+						String affectedElementIRI = affectedElement.getTextContent();
+						logger.info(String.format("The pitfall for elem <%s> : [%s][%s] - (%s) -> Description : %s",
+								affectedElementIRI, pitfallCode, pitfallImportance, pitfallName, pitfallDescription));
+						if (!detectedPitfalls.containsKey(affectedElementIRI)) {
+							detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+						}
+						
+						detectedPitfalls.get(affectedElementIRI).add(
+								new Pitfall(
+										PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+										pitfallCode,
+										pitfallName,
+										pitfallDescription,
+										pitfallNumAffectedElems));
+					}
 				}
 			}
 		}
         
-        evaluationResults = new EvaluationResult(detectedPitfalls);
+		evaluationResults.setDetectedPitfalls(detectedPitfalls);
         
         return evaluationResults;
 	}

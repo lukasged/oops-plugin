@@ -13,6 +13,14 @@ import java.util.TreeMap;
  */
 public class EvaluationResult {
     private HashMap<String, ArrayList<Pitfall>> detectedPitfalls;
+    private ArrayList<ElementPair> elementsWithSameLabel;
+    private ArrayList<ElementPair> equivalentClasses;
+    private ArrayList<ElementPair> equivalentRelations;
+    private ArrayList<ElementPair> equivalentAttributes;
+    private ArrayList<ElementPair> wrongInverseRelations;
+    private ArrayList<ElementPair> mightBeInverseRelations;
+    
+    public EvaluationResult() {}
     
     public EvaluationResult(HashMap<String, ArrayList<Pitfall>> detectedPitfalls) {
         this.detectedPitfalls = detectedPitfalls;
@@ -71,9 +79,100 @@ public class EvaluationResult {
 	 * 
 	 * @return the detected pitfalls map
 	 */
-    public HashMap<String, ArrayList<Pitfall>> detectedPitfalls() {
+    public HashMap<String, ArrayList<Pitfall>> getDetectedPitfalls() {
     	return detectedPitfalls;
     }
+    
+	/**
+	 * @param detectedPitfalls the detectedPitfalls to set
+	 */
+	public void setDetectedPitfalls(HashMap<String, ArrayList<Pitfall>> detectedPitfalls) {
+		this.detectedPitfalls = detectedPitfalls;
+	}
+
+	/**
+	 * @return the elementsWithSameLabel
+	 */
+	public ArrayList<ElementPair> getElementsWithSameLabel() {
+		return elementsWithSameLabel;
+	}
+
+	/**
+	 * @param elementsWithSameLabel the elementsWithSameLabel to set
+	 */
+	public void setElementsWithSameLabel(ArrayList<ElementPair> elementsWithSameLabel) {
+		this.elementsWithSameLabel = elementsWithSameLabel;
+	}
+
+	/**
+	 * @return the equivalentClasses
+	 */
+	public ArrayList<ElementPair> getEquivalentClasses() {
+		return equivalentClasses;
+	}
+
+	/**
+	 * @param equivalentClasses the equivalentClasses to set
+	 */
+	public void setEquivalentClasses(ArrayList<ElementPair> equivalentClasses) {
+		this.equivalentClasses = equivalentClasses;
+	}
+
+	/**
+	 * @return the equivalentRelations
+	 */
+	public ArrayList<ElementPair> getEquivalentRelations() {
+		return equivalentRelations;
+	}
+
+	/**
+	 * @param equivalentRelations the equivalentRelations to set
+	 */
+	public void setEquivalentRelations(ArrayList<ElementPair> equivalentRelations) {
+		this.equivalentRelations = equivalentRelations;
+	}
+
+	/**
+	 * @return the equivalentAttributes
+	 */
+	public ArrayList<ElementPair> getEquivalentAttributes() {
+		return equivalentAttributes;
+	}
+
+	/**
+	 * @param equivalentAttributes the equivalentAttributes to set
+	 */
+	public void setEquivalentAttributes(ArrayList<ElementPair> equivalentAttributes) {
+		this.equivalentAttributes = equivalentAttributes;
+	}
+
+	/**
+	 * @return the wrongInverseRelations
+	 */
+	public ArrayList<ElementPair> getWrongInverseRelations() {
+		return wrongInverseRelations;
+	}
+
+	/**
+	 * @param wrongInverseRelations the wrongInverseRelations to set
+	 */
+	public void setWrongInverseRelations(ArrayList<ElementPair> wrongInverseRelations) {
+		this.wrongInverseRelations = wrongInverseRelations;
+	}
+
+	/**
+	 * @return the mightBeInverseRelations
+	 */
+	public ArrayList<ElementPair> getMightBeInverseRelations() {
+		return mightBeInverseRelations;
+	}
+
+	/**
+	 * @param mightBeInverseRelations the mightBeInverseRelations to set
+	 */
+	public void setMightBeInverseRelations(ArrayList<ElementPair> mightBeInverseRelations) {
+		this.mightBeInverseRelations = mightBeInverseRelations;
+	}
     
     public TreeMap<Pitfall, ArrayList<String>> pitfallsWithAffectedElements() {
     	TreeMap<Pitfall, ArrayList<String>> pitfallsWithAffectedElements = new TreeMap<Pitfall, ArrayList<String>>();

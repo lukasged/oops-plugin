@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
+import oops.model.ElementPair;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 
@@ -157,10 +158,24 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					pitfallLabelHolder.add(pitfallNumCasesLabel, BorderLayout.EAST);
 					
 					String pitfallText = "<html><br><p>" + p.getDescription() + "</p><br>";
-					pitfallText += "<p>This pitfall appears in the following elements:</p>";
+					
+					switch (p.getPitfallID()) {
+					case OOPSEvaluator.PITFALL_EQUIVALENT_CLASSES_ID:
+						ArrayList<ElementPair> equivalentClasses = evaluationResult.getEquivalentClasses();
 
-					for (String element : elements) {
-						pitfallText += "<p>> <a href=" + element + ">" + element + "</a></p>";
+						pitfallText += "<p>The following classes might be equivalent:</p>";
+
+						for (ElementPair pair : equivalentClasses) {
+							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
+									+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+						}
+						break;
+					default:
+						pitfallText += "<p>This pitfall appears in the following elements:</p>";
+
+						for (String element : elements) {
+							pitfallText += "<p>> <a href=" + element + ">" + element + "</a></p>";
+						}
 					}
 					
 					pitfallText += "</html>";
