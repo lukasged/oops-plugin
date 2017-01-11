@@ -10,6 +10,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,9 @@ public class OOPSEvaluator {
 	public static final String PITFALL_MIGHT_BE_INVERSE_ID = "P13";
 	public static final String PITFALL_MIGHT_BE_EQUIVALENT_ID = "P12";
 	public static final String PITFALL_EQUIVALENT_CLASSES_ID = "P30";
+	public static final String PITFALL_DIFF_NAMING_CONVENTIONS_ID = "P22";
+	
+	private static final String OWL_THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
 
     private static OWLOntology activeOntology;
     
@@ -367,6 +371,15 @@ public class OOPSEvaluator {
 					}
 					
 					evaluationResults.setWrongInverseRelations(wrongInverseRelations);
+					
+					break;
+				case PITFALL_DIFF_NAMING_CONVENTIONS_ID:
+					detectedPitfalls.put(OWL_THING_IRI, new ArrayList<Pitfall>(Arrays.asList(new Pitfall(
+							PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+							pitfallCode,
+							pitfallName,
+							pitfallDescription,
+							pitfallNumAffectedElems))));
 					
 					break;
 				default:

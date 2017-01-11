@@ -3,6 +3,7 @@ package oops.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -13,12 +14,12 @@ import java.util.TreeMap;
  */
 public class EvaluationResult {
     private HashMap<String, ArrayList<Pitfall>> detectedPitfalls;
-    private ArrayList<ElementPair> elementsWithSameLabel;
-    private ArrayList<ElementPair> equivalentClasses;
-    private ArrayList<ElementPair> equivalentRelations;
-    private ArrayList<ElementPair> equivalentAttributes;
-    private ArrayList<ElementPair> wrongInverseRelations;
-    private ArrayList<ElementPair> mightBeInverseRelations;
+    private List<ElementPair> elementsWithSameLabel;
+    private List<ElementPair> equivalentClasses;
+    private List<ElementPair> equivalentRelations;
+    private List<ElementPair> equivalentAttributes;
+    private List<ElementPair> wrongInverseRelations;
+    private List<ElementPair> mightBeInverseRelations;
     
     public EvaluationResult() {}
     
@@ -36,7 +37,7 @@ public class EvaluationResult {
 	 *         importance level encountered
 	 */
     public PitfallImportanceLevel getHighestImportanceLevelForEntity(String entityURI) {
-        ArrayList<Pitfall> pitfalls = detectedPitfalls.get(entityURI);
+        List<Pitfall> pitfalls = detectedPitfalls.get(entityURI);
         
         if (pitfalls != null) {
             return PitfallImportanceLevel.IMPORTANT;
@@ -52,7 +53,7 @@ public class EvaluationResult {
 	 *            the entity whose pitfalls are to be checked
 	 * @return the detected pitfalls for the specified OWL entity
 	 */
-    public ArrayList<Pitfall> getPitfallsForOWLEntity(String entityURI) {
+    public List<Pitfall> getPitfallsForOWLEntity(String entityURI) {
         return detectedPitfalls.get(entityURI);
     }
     
@@ -93,84 +94,84 @@ public class EvaluationResult {
 	/**
 	 * @return the elementsWithSameLabel
 	 */
-	public ArrayList<ElementPair> getElementsWithSameLabel() {
+	public List<ElementPair> getElementsWithSameLabel() {
 		return elementsWithSameLabel;
 	}
 
 	/**
 	 * @param elementsWithSameLabel the elementsWithSameLabel to set
 	 */
-	public void setElementsWithSameLabel(ArrayList<ElementPair> elementsWithSameLabel) {
+	public void setElementsWithSameLabel(List<ElementPair> elementsWithSameLabel) {
 		this.elementsWithSameLabel = elementsWithSameLabel;
 	}
 
 	/**
 	 * @return the equivalentClasses
 	 */
-	public ArrayList<ElementPair> getEquivalentClasses() {
+	public List<ElementPair> getEquivalentClasses() {
 		return equivalentClasses;
 	}
 
 	/**
 	 * @param equivalentClasses the equivalentClasses to set
 	 */
-	public void setEquivalentClasses(ArrayList<ElementPair> equivalentClasses) {
+	public void setEquivalentClasses(List<ElementPair> equivalentClasses) {
 		this.equivalentClasses = equivalentClasses;
 	}
 
 	/**
 	 * @return the equivalentRelations
 	 */
-	public ArrayList<ElementPair> getEquivalentRelations() {
+	public List<ElementPair> getEquivalentRelations() {
 		return equivalentRelations;
 	}
 
 	/**
 	 * @param equivalentRelations the equivalentRelations to set
 	 */
-	public void setEquivalentRelations(ArrayList<ElementPair> equivalentRelations) {
+	public void setEquivalentRelations(List<ElementPair> equivalentRelations) {
 		this.equivalentRelations = equivalentRelations;
 	}
 
 	/**
 	 * @return the equivalentAttributes
 	 */
-	public ArrayList<ElementPair> getEquivalentAttributes() {
+	public List<ElementPair> getEquivalentAttributes() {
 		return equivalentAttributes;
 	}
 
 	/**
 	 * @param equivalentAttributes the equivalentAttributes to set
 	 */
-	public void setEquivalentAttributes(ArrayList<ElementPair> equivalentAttributes) {
+	public void setEquivalentAttributes(List<ElementPair> equivalentAttributes) {
 		this.equivalentAttributes = equivalentAttributes;
 	}
 
 	/**
 	 * @return the wrongInverseRelations
 	 */
-	public ArrayList<ElementPair> getWrongInverseRelations() {
+	public List<ElementPair> getWrongInverseRelations() {
 		return wrongInverseRelations;
 	}
 
 	/**
 	 * @param wrongInverseRelations the wrongInverseRelations to set
 	 */
-	public void setWrongInverseRelations(ArrayList<ElementPair> wrongInverseRelations) {
+	public void setWrongInverseRelations(List<ElementPair> wrongInverseRelations) {
 		this.wrongInverseRelations = wrongInverseRelations;
 	}
 
 	/**
 	 * @return the mightBeInverseRelations
 	 */
-	public ArrayList<ElementPair> getMightBeInverseRelations() {
+	public List<ElementPair> getMightBeInverseRelations() {
 		return mightBeInverseRelations;
 	}
 
 	/**
 	 * @param mightBeInverseRelations the mightBeInverseRelations to set
 	 */
-	public void setMightBeInverseRelations(ArrayList<ElementPair> mightBeInverseRelations) {
+	public void setMightBeInverseRelations(List<ElementPair> mightBeInverseRelations) {
 		this.mightBeInverseRelations = mightBeInverseRelations;
 	}
     

@@ -1,12 +1,29 @@
 package oops.ui;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+
 import org.protege.editor.core.ui.util.Resettable;
 import org.protege.editor.core.util.HandlerRegistration;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +32,6 @@ import oops.evaluation.OOPSEvaluator;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
-
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 
 /**
@@ -156,7 +165,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             top.add(important);
             top.add(critical);
             
-            ArrayList<Pitfall> detectedPitfalls = evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI);
+            List<Pitfall> detectedPitfalls = evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI);
             
     		if (detectedPitfalls != null) {
     			for (Pitfall pitfall : detectedPitfalls) {

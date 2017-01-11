@@ -6,13 +6,18 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -22,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
+import org.protege.editor.core.ui.util.Icons;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +37,7 @@ import oops.evaluation.OOPSEvaluator;
 import oops.model.ElementPair;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
+import oops.model.PitfallImportanceLevel;
 
 /**
  * Author: Lukas Gedvilas<br>
@@ -176,22 +183,37 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					JLabel pitfallNameLabel = new JLabel("Results for " + p.getPitfallID() + ": " + p.getName());
 					pitfallNameLabel.setFont(new Font("serif", Font.BOLD, 14));
 					
-					String cases = " case" + (elements.size() != 1 ? "s" : "");
+					String cases = p.getNumAffectedElements() + " case" + (elements.size() != 1 ? "s" : "");
 					String importanceLevel = p.getImportanceLevel().toString();
 					String capitalizedImportance = importanceLevel.charAt(0) +
 							importanceLevel.toLowerCase().substring(1, importanceLevel.length());
-					JLabel pitfallNumCasesLabel = new JLabel(
-							p.getNumAffectedElements() + cases + " | " + capitalizedImportance);
+					String numCasesOrOntology = isGeneralPitfall(p.getPitfallID()) ? "ontology*" : cases;
+					JLabel pitfallNumCasesLabel = new JLabel(numCasesOrOntology + " | " + capitalizedImportance + " ");
+					pitfallNumCasesLabel.setOpaque(false);
 					pitfallNumCasesLabel.setFont(new Font("serif", Font.BOLD, 14));
 					
+					IconComponent iconComponent = new IconComponent();
+					iconComponent.setOpaque(false);
+					URL iconURL = this.getClass().getResource("/" + 
+							p.getImportanceLevel().toString().toLowerCase() + ".png");
+					Image scaledIcon = new ImageIcon(iconURL).getImage().getScaledInstance(16, 16, 
+							Image.SCALE_DEFAULT);
+					iconComponent.setIcon(new ImageIcon(scaledIcon));
+					
+					JPanel rightSidePanel = new JPanel();
+					rightSidePanel.setLayout(new BoxLayout(rightSidePanel, BoxLayout.X_AXIS));
+					rightSidePanel.add(pitfallNumCasesLabel);
+					rightSidePanel.add(iconComponent);
+					rightSidePanel.setOpaque(false);
+					
 					pitfallLabelHolder.add(pitfallNameLabel, BorderLayout.WEST);
-					pitfallLabelHolder.add(pitfallNumCasesLabel, BorderLayout.EAST);
+					pitfallLabelHolder.add(rightSidePanel, BorderLayout.EAST);
 					
 					String pitfallText = "<html><br><p>" + p.getDescription() + "</p><br>";
 					
 					switch (p.getPitfallID()) {
 					case OOPSEvaluator.PITFALL_EQUIVALENT_CLASSES_ID:
-						ArrayList<ElementPair> equivalentClasses = evaluationResult.getEquivalentClasses();
+						List<ElementPair> equivalentClasses = evaluationResult.getEquivalentClasses();
 
 						pitfallText += "<p>The following classes might be equivalent:</p>";
 
@@ -201,8 +223,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 						}
 						break;
 					case OOPSEvaluator.PITFALL_MIGHT_BE_EQUIVALENT_ID:
-						ArrayList<ElementPair> equivalentProperties = evaluationResult.getEquivalentRelations();
-						ArrayList<ElementPair> equivalentAttributes = evaluationResult.getEquivalentAttributes();
+						List<ElementPair> equivalentProperties = evaluationResult.getEquivalentRelations();
+						List<ElementPair> equivalentAttributes = evaluationResult.getEquivalentAttributes();
 						
 						if (equivalentProperties.size() > 0) {
 							pitfallText += "<p>The following relations could be defined as equivalent:</p>";
@@ -224,7 +246,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 
 						break;
 					case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
-						ArrayList<ElementPair> mightBeInverseRelations = evaluationResult.getMightBeInverseRelations();
+						List<ElementPair> mightBeInverseRelations = evaluationResult.getMightBeInverseRelations();
 						
 						for (ElementPair pair : mightBeInverseRelations) {
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
@@ -234,7 +256,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 						
 						break;
 					case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
-						ArrayList<ElementPair> wrongInverseRelations = evaluationResult.getWrongInverseRelations();
+						List<ElementPair> wrongInverseRelations = evaluationResult.getWrongInverseRelations();
 						
 						for (ElementPair pair : wrongInverseRelations) {
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
@@ -294,12 +316,24 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			
 			JScrollPane scrollPane = new JScrollPane(contentPane);
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			scrollPane.getVerticalScrollBar().setUnitIncrement(16); // increase scrolling speed to a more usual pace
 			
 			pitfallsListDialog.setContentPane(scrollPane);
 			pitfallsListDialog.setVisible(true);
 		});
 		
 		getView().setShowViewBar(false); // disable view label bar
+	}
+	
+	/**
+	 * Returns true if the specified pitfall affects the ontology itself
+	 * 
+	 * @param pitfallCode
+	 *            the specified pitfall code
+	 * @return true if the specified pitfall affects the ontology itself
+	 */
+	private boolean isGeneralPitfall(String pitfallCode) {
+		return pitfallCode.equals(OOPSEvaluator.PITFALL_DIFF_NAMING_CONVENTIONS_ID);
 	}
 	
 	@Override

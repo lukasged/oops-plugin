@@ -480,7 +480,7 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
                 setStrikeThrough(false);
             }
             
-            ArrayList<Pitfall> nodePitfalls = evaluationResult.getPitfallsForOWLEntity(entity.getIRI().toString());
+            List<Pitfall> nodePitfalls = evaluationResult.getPitfallsForOWLEntity(entity.getIRI().toString());
             
             if (nodePitfalls != null) { // node presents some pitfalls
             	setUnderlinedText(true);
@@ -1181,39 +1181,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
          */
         public Dimension minimumLayoutSize(Container parent) {
             return new Dimension(0, 0);
-        }
-    }
-
-
-    private static final class IconComponent extends JPanel {
-
-        private Icon icon;
-
-        private Dimension preferredSize = new Dimension();
-
-        public void setIcon(Icon icon) {
-            this.icon = icon;
-            if (icon != null) {
-                preferredSize.width = icon.getIconWidth();
-                preferredSize.height = icon.getIconHeight();
-            }
-            else {
-                preferredSize.width = 0;
-                preferredSize.height = 0;
-            }
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return preferredSize;
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (icon != null) {
-                icon.paintIcon(this, g, 0, 0);
-            }
         }
     }
 }
