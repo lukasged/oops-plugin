@@ -91,6 +91,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			+ "is-your-linked-data-vocabulary-5-star_9588.html</li></ul>";
 	
 	private static final int LIST_PITFALLS_BORDER_MARGIN = 30;
+	private static final Dimension LIST_PITFALLS_DIMENSION = new Dimension(800, 450);
 	
 	private static final Color COLOR_PITFALL_ID_BACKGROUND = new Color(233, 231, 231);
 	private static final Color COLOR_PITFALL_ID_BACKGROUND_HOVER = new Color(227, 226, 226);
@@ -148,7 +149,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			pitfallsListDialog.setTitle(LIST_PITFALLS_DIALOG_TITLE);
 			pitfallsListDialog.setModalityType((JDialog.ModalityType.APPLICATION_MODAL));
 			pitfallsListDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			pitfallsListDialog.setSize(new Dimension(800,250));
+			pitfallsListDialog.setSize(LIST_PITFALLS_DIMENSION);
 			pitfallsListDialog.setLocationRelativeTo(null);
 			
 			JPanel contentPane = new JPanel();
@@ -272,9 +273,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 							pitfallText += "<p>> <a href=" + element + ">" + element + "</a></p>";
 						}
 					}
-					
-					pitfallText += "<br><p>References:</p>";
-					pitfallText += OOPS_RESULTS_REFERENCES_TEXT;
 					
 					pitfallText += "</html>";
 					
