@@ -2,8 +2,10 @@ package oops.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
@@ -36,14 +38,18 @@ public class EvaluationResult {
 	 * @return the pitfalls for the specified OWL entity and returns the highest
 	 *         importance level encountered
 	 */
-    public PitfallImportanceLevel getHighestImportanceLevelForEntity(String entityURI) {
+    public Optional<PitfallImportanceLevel> getHighestImportanceLevelForEntity(String entityURI) {
         List<Pitfall> pitfalls = detectedPitfalls.get(entityURI);
         
+        Optional<PitfallImportanceLevel> result = Optional.empty();
+        
         if (pitfalls != null) {
-            return PitfallImportanceLevel.IMPORTANT;
-        } else {
-            return null;
+        	result = pitfalls.stream()
+        			.map(p -> p.getImportanceLevel())
+        			.max(Comparator.naturalOrder());
         }
+        
+        return result;
     }
     
 	/**

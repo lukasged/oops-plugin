@@ -23,6 +23,7 @@ import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
@@ -263,14 +264,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
     public void setStrikeThrough(boolean strikeThrough) {
         this.strikeThrough = strikeThrough;
     }
-    
-    public void setUnderlinedText(boolean underlinedText) {
-    	this.underlinedText = underlinedText;
-    }
-    
-    public void setUnderlinedColor(Color underlinedColor) {
-    	this.underlinedColor = underlinedColor;
-    }
 
     public int getPreferredWidth() {
         return preferredWidth;
@@ -483,24 +476,12 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             List<Pitfall> nodePitfalls = evaluationResult.getPitfallsForOWLEntity(entity.getIRI().toString());
             
             if (nodePitfalls != null) { // node presents some pitfalls
-            	setUnderlinedText(true);
-            	PitfallImportanceLevel mostImportantLevel = evaluationResult.getHighestImportanceLevelForEntity(entity.getIRI().toString());
+            	PitfallImportanceLevel mostImportantLevel = 
+            			evaluationResult.getHighestImportanceLevelForEntity(entity.getIRI().toString()).get();
 
-            	
-                switch (mostImportantLevel) {
-                case MINOR:
-                    icon = Icons.getIcon("WARNING.png");
-                    setUnderlinedColor(Color.YELLOW);
-                    break;
-                case IMPORTANT:
-                    icon = Icons.getIcon("warning.png");
-                    setUnderlinedColor(Color.YELLOW);
-                    break;
-                case CRITICAL:
-                    icon = Icons.getIcon("error.png");
-                    setUnderlinedColor(Color.RED);
-                    break;
-                }
+            	URL iconURL = this.getClass().getResource("/" + mostImportantLevel.toString().toLowerCase() + ".png");
+            	Image scaledImage = new ImageIcon(iconURL).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT);
+            	icon = new ImageIcon(scaledImage);
             } else {
             	/*
             	if (childrenHavePitfalls(entity.asOWLClass())) {
@@ -631,10 +612,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
     private Style foreground;
 
     private Style linkStyle;
-    
-    private Style errorStyle;
-    
-    private Style warningStyle;
 
     private Style inconsistentClassStyle;
 
@@ -685,14 +662,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
         linkStyle = doc.addStyle("LINK_STYLE", null);
         StyleConstants.setForeground(linkStyle, Color.BLUE);
         StyleConstants.setUnderline(linkStyle, true);
-        
-        errorStyle = doc.addStyle("ERROR_STYLE", null);
-        //StyleConstants.setForeground(errorStyle, Color.RED);
-        StyleConstants.setUnderline(errorStyle, true);
-        
-        warningStyle = doc.addStyle("WARNING_STYLE", null);
-        //StyleConstants.setForeground(warningStyle, Color.YELLOW);
-        StyleConstants.setUnderline(warningStyle, true);
 
         inconsistentClassStyle = doc.addStyle("INCONSISTENT_CLASS_STYLE", null);
         StyleConstants.setForeground(inconsistentClassStyle, Color.RED);
@@ -748,14 +717,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
         if (strikeThrough) {
             doc.setParagraphAttributes(0, doc.getLength(), strikeOutStyle, false);
-        }
-        
-        if (underlinedText) {
-        	if (underlinedColor == Color.RED) {
-        		doc.setParagraphAttributes(0, doc.getLength(), errorStyle, false);
-        	} else if (underlinedColor == Color.YELLOW) {
-        		doc.setParagraphAttributes(0, doc.getLength(), warningStyle, false);
-        	}
         }
 
         if (ontology != null) {

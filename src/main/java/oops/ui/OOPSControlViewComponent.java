@@ -196,9 +196,9 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					iconComponent.setOpaque(false);
 					URL iconURL = this.getClass().getResource("/" + 
 							p.getImportanceLevel().toString().toLowerCase() + ".png");
-					Image scaledIcon = new ImageIcon(iconURL).getImage().getScaledInstance(16, 16, 
+					Image scaledImage = new ImageIcon(iconURL).getImage().getScaledInstance(16, 16, 
 							Image.SCALE_DEFAULT);
-					iconComponent.setIcon(new ImageIcon(scaledIcon));
+					iconComponent.setIcon(new ImageIcon(scaledImage));
 					
 					JPanel rightSidePanel = new JPanel();
 					rightSidePanel.setLayout(new BoxLayout(rightSidePanel, BoxLayout.X_AXIS));
