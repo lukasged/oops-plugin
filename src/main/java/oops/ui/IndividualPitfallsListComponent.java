@@ -2,14 +2,19 @@ package oops.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -22,6 +27,7 @@ import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
@@ -29,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
+import oops.model.ElementPair;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
@@ -56,6 +63,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     private static final String EVALUATION_PENDING_PANEL_LABEL = "Evaluate the ontology to see its pitfalls";
     
     private static final String PITFALLS_PANEL_ID = "Pitfalls";
+    
+    private static final String TEXT_SELECT_PITFALL = "Please select a pitfall to see its details";
 
     private static final Logger logger = LoggerFactory.getLogger(IndividualPitfallsListComponent.class);
 
@@ -65,11 +74,20 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     
     private JTree pitfallsTree;
     
-    private JScrollPane pitfallsTreeView;
+    private JPanel pitfallDetails;
+    
+    private JTextArea pitfallDetailsTextArea;
+    
+    private JScrollPane pitfallsTreeView, pitfallDetailsView;
     
     private OOPSEvaluator evaluator;
     
-    private EvaluationResult evaluationResult;   
+    private EvaluationResult evaluationResult;
+    
+    private OWLEntity selEntity;
+    private String selectedEntityIRI;
+    
+    List<Pitfall> detectedPitfalls;
 
     protected void initialiseOWLView() throws Exception {
         setLayout(new BorderLayout());
@@ -79,14 +97,52 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         add(pitfallsListLabel, BorderLayout.NORTH);
         
         selectedItemPitfallsCard = new JPanel();
-        selectedItemPitfallsCard.setLayout(new BorderLayout());
+        selectedItemPitfallsCard.setLayout(new GridLayout(1, 2));
         
         pitfallsTree = new JTree();
         pitfallsTree.setRootVisible(false); // hide the root node
         pitfallsTree.setCellRenderer(new TreeCellRendererWithTooltip()); // enable custom CellRenderer
+        pitfallsTree.addTreeSelectionListener(event -> {
+        	DefaultMutableTreeNode node = (DefaultMutableTreeNode) pitfallsTree.getLastSelectedPathComponent();
+        	
+        	// if nothing is selected
+        	if (node == null) {
+        		pitfallDetailsTextArea.setText(TEXT_SELECT_PITFALL);
+        	} else {
+            	String nodeText = node.getUserObject().toString();
+            	
+            	// if one of the parent nodes is selected
+            	if (nodeText.matches("(Minor|Important|Critical).*")) {
+            		pitfallDetailsTextArea.setText(TEXT_SELECT_PITFALL);
+            	} else { // a pitfall is selected
+                	Pitfall selectedPitfall = getSelectedPitfall(nodeText);
+                	
+                	String pitfallDetailsText = getPitfallDetails(selectedPitfall, selEntity);
+                	
+                	pitfallDetailsTextArea.setText(pitfallDetailsText);
+            	}
+        	}
+        });
         pitfallsTreeView = new JScrollPane(pitfallsTree);
         
-        selectedItemPitfallsCard.add(pitfallsTreeView, BorderLayout.CENTER);
+        pitfallDetails = new JPanel();
+        pitfallDetails.setLayout(new BorderLayout());
+        pitfallDetails.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        pitfallDetailsTextArea = new JTextArea();
+        pitfallDetailsTextArea.setEditable(false);
+        pitfallDetailsTextArea.setFont(new Font("Serif", Font.PLAIN, 14));
+        pitfallDetailsTextArea.setLineWrap(true);
+        pitfallDetailsTextArea.setWrapStyleWord(true);
+        pitfallDetailsTextArea.setText("Please select a pitfall to see its details");
+        pitfallDetails.add(pitfallDetailsTextArea, BorderLayout.CENTER);
+        pitfallDetails.setBackground(Color.WHITE);
+        
+        pitfallDetailsView = new JScrollPane(pitfallDetails);
+        pitfallDetailsView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        selectedItemPitfallsCard.add(pitfallsTreeView);
+        selectedItemPitfallsCard.add(pitfallDetailsView);
         
         add(cardPanel, BorderLayout.CENTER);
         cardPanel.setLayout(cardLayout);
@@ -105,8 +161,78 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         selectionChanged();
     }
 
+	/**
+	 * Returns a detailed description for the selected Pitfall
+	 * 
+	 * @param selectedPitfall
+	 *            the selected pitfall in the selected element's pitfalls view
+	 * @param selEntity
+	 *            the selected entity in the hierarchy view
+	 * @return a detailed description for the selected Pitfall
+	 */
+	private String getPitfallDetails(Pitfall selectedPitfall, OWLEntity selEntity) {
+    	String pitfallDetailsText = selectedPitfall.getDescription();
+    	
+    	List<ElementPair> additionalInfoElements = null;
+    	
+    	switch (selectedPitfall.getPitfallID()) {
+    	case OOPSEvaluator.PITFALL_EQUIVALENT_CLASSES_ID:
+    		additionalInfoElements = evaluationResult.getEquivalentClasses();
+    		pitfallDetailsText += "\n\nThis class might be equivalent to the following classes:\n";
+    		break;
+    	case OOPSEvaluator.PITFALL_MIGHT_BE_EQUIVALENT_ID:
+    		if (selEntity.getEntityType() == EntityType.OBJECT_PROPERTY) {
+    			additionalInfoElements = evaluationResult.getEquivalentRelations();
+    			pitfallDetailsText += "\n\nThis relation might be equivalent to the following elements:\n";
+    			
+    		} else if (selEntity.getEntityType() == EntityType.DATA_PROPERTY) {
+    			additionalInfoElements = evaluationResult.getEquivalentAttributes();
+    			pitfallDetailsText += "\n\nThis attribute might be equivalent to the following elements:\n";
+    		}
+    		break;
+    	case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
+    		additionalInfoElements = evaluationResult.getMightBeInverseRelations();
+    		pitfallDetailsText += "\n\nThis relation could be inverse of:\n";
+    		break;
+    	case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
+    		additionalInfoElements = evaluationResult.getWrongInverseRelations();
+    		pitfallDetailsText += "\n\nThis relation may not be inverse of:\n";
+    		break;
+    	}
+    	
+    	if (additionalInfoElements != null && additionalInfoElements.size() > 0) {
+    		List<ElementPair> relatedPairs = additionalInfoElements.stream()
+    				.filter(pair -> 
+    					pair.getElementA().equals(selectedEntityIRI) || 
+    					pair.getElementB().equals(selectedEntityIRI))
+    				.collect(Collectors.toList());
+    		
+    		for (ElementPair relatedPair : relatedPairs) {
+    			String equivalentClass = relatedPair.getElementA().equals(selectedEntityIRI) ?
+    					relatedPair.getElementB() : relatedPair.getElementA();
+    			pitfallDetailsText += ">   " + equivalentClass + "\n";
+    		}    		
+    	}
+    	
+    	return pitfallDetailsText;
+	}
 
-    public void reset() {
+	/**
+	 * Gets the selected pitfall in the individual pitfalls list
+	 * 
+	 * @param nodeText
+	 *            the text of the selected node in the pitfalls tree
+	 * @return the selected pitfall in the individual pitfalls list
+	 */
+    private Pitfall getSelectedPitfall(String nodeText) {
+    	return detectedPitfalls.stream()
+    		.filter(p -> nodeText.startsWith(p.getPitfallID()))
+    		.findFirst()
+    		.get();
+	}
+
+
+	public void reset() {
         pitfallsTree.removeAll();
         pitfallsListLabel.setText("");
         validate();
@@ -151,10 +277,10 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         selectPanel((evaluationResult != null) ? PITFALLS_PANEL_ID : EVALUATION_PENDING_PANEL_ID);
         
-        OWLEntity selEntity = (OWLEntity) selectedObject;
+        selEntity = (OWLEntity) selectedObject;
         
         if (evaluationResult != null) {
-        	String selectedEntityIRI = selEntity.getIRI().toString();
+        	selectedEntityIRI = selEntity.getIRI().toString();
             
             DefaultMutableTreeNode top = new DefaultMutableTreeNode();
             DefaultMutableTreeNode minor = new DefaultMutableTreeNode("Minor (0 items)");
@@ -165,7 +291,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             top.add(important);
             top.add(critical);
             
-            List<Pitfall> detectedPitfalls = evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI);
+            detectedPitfalls = evaluationResult.getPitfallsForOWLEntity(selectedEntityIRI);
             
     		if (detectedPitfalls != null) {
     			for (Pitfall pitfall : detectedPitfalls) {

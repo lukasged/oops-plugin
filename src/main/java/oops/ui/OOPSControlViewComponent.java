@@ -16,7 +16,6 @@ import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -27,7 +26,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
-import org.protege.editor.core.ui.util.Icons;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,6 @@ import oops.evaluation.OOPSEvaluator;
 import oops.model.ElementPair;
 import oops.model.EvaluationResult;
 import oops.model.Pitfall;
-import oops.model.PitfallImportanceLevel;
 
 /**
  * Author: Lukas Gedvilas<br>
