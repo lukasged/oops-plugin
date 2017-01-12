@@ -70,11 +70,13 @@ public class OOPSEvaluator {
 	private static final String OOPS_TAG_EQUIVALENT_ATTRIBUTE = OOPS_XML_PREFIX + "MightBeEquivalentAttribute";
 	private static final String OOPS_TAG_EQUIVALENT_CLASSES = OOPS_XML_PREFIX + "MightBeEquivalentClass";
 	private static final String OOPS_TAG_NO_INVERSE_SUGGESTION = OOPS_XML_PREFIX + "NoInverseSuggestion";
+	private static final String OOPS_TAG_SAME_LABEL = OOPS_XML_PREFIX + "HaveSameLabel";
 	
 	public static final String PITFALL_WRONG_INVERSE_ID = "P05";
 	public static final String PITFALL_MIGHT_BE_INVERSE_ID = "P13";
 	public static final String PITFALL_MIGHT_BE_EQUIVALENT_ID = "P12";
 	public static final String PITFALL_EQUIVALENT_CLASSES_ID = "P30";
+	public static final String PITFALL_SAME_LABEL = "P32";
 	public static final String PITFALL_DIFF_NAMING_CONVENTIONS_ID = "P22";
 	
 	private static final String OWL_THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
@@ -405,6 +407,38 @@ public class OOPSEvaluator {
 					}
 					
 					evaluationResults.setWrongInverseRelations(wrongInverseRelations);
+					
+					break;
+				case PITFALL_SAME_LABEL:
+					NodeList haveSameLabelNodeList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_SAME_LABEL);
+					
+					ArrayList<ElementPair> elementsWithSameLabel = new ArrayList<ElementPair>();
+					
+					for (int j = 0; j < haveSameLabelNodeList.getLength(); j++) {
+						Element hasSameLabelNode = (Element) haveSameLabelNodeList.item(j);
+						
+						NodeList sameLabelNodes = hasSameLabelNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						String equivalent1 = sameLabelNodes.item(0).getFirstChild().getNodeValue();
+						String equivalent2 = sameLabelNodes.item(1).getFirstChild().getNodeValue();
+						
+						for (String elementIRI : new String[]{equivalent1, equivalent2}) {
+							if (!detectedPitfalls.containsKey(elementIRI)) {
+								detectedPitfalls.put(elementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(elementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+						}
+						
+						elementsWithSameLabel.add(new ElementPair(equivalent1, equivalent2));
+					}
+					
+					evaluationResults.setElementsWithSameLabel(elementsWithSameLabel);
 					
 					break;
 				case PITFALL_DIFF_NAMING_CONVENTIONS_ID:

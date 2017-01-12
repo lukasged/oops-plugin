@@ -125,6 +125,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         	}
         });
         pitfallsTreeView = new JScrollPane(pitfallsTree);
+        pitfallsTreeView.getVerticalScrollBar().setUnitIncrement(16); // increase scrolling speed to a more usual pace
         
         pitfallDetails = new JPanel();
         pitfallDetails.setLayout(new BorderLayout());
@@ -141,6 +142,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         pitfallDetailsView = new JScrollPane(pitfallDetails);
         pitfallDetailsView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pitfallDetailsView.getVerticalScrollBar().setUnitIncrement(16); // increase scrolling speed to a more usual pace
         
         selectedItemPitfallsCard.add(pitfallsTreeView);
         selectedItemPitfallsCard.add(pitfallDetailsView);
@@ -198,6 +200,10 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     			pitfallDetailsText += "\n\nThis relation could be inverse of:\n";
     		}
     		
+    		break;
+    	case OOPSEvaluator.PITFALL_SAME_LABEL:
+    		additionalInfoElements = evaluationResult.getElementsWithSameLabel();
+    		pitfallDetailsText += "\n\nThis element has the same label as:\n";
     		break;
     	case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
     		additionalInfoElements = evaluationResult.getWrongInverseRelations();

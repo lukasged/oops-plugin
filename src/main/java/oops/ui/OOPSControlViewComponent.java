@@ -219,6 +219,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
 									+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
 						}
+						
 						break;
 					case OOPSEvaluator.PITFALL_MIGHT_BE_EQUIVALENT_ID:
 						List<ElementPair> equivalentProperties = evaluationResult.getEquivalentRelations();
@@ -264,6 +265,19 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 						
 						for (String relationWithoutInverse : relationsWithoutInverse) {
 							pitfallText += "<p>> <a href=" + relationWithoutInverse + ">" + relationWithoutInverse + "</a></p>";
+						}
+						
+						break;
+					case OOPSEvaluator.PITFALL_SAME_LABEL:
+						List<ElementPair> elementsWithSameLabel = evaluationResult.getElementsWithSameLabel();
+						
+						if (elementsWithSameLabel.size() > 0) {
+							pitfallText += "<p>The following elements have the same label:</p>";
+						}
+						
+						for (ElementPair pair : elementsWithSameLabel) {
+							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
+									+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
 						}
 						
 						break;
