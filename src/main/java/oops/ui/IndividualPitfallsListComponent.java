@@ -121,6 +121,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
                 	String pitfallDetailsText = getPitfallDetails(selectedPitfall, selEntity);
                 	
                 	pitfallDetailsTextArea.setText(pitfallDetailsText);
+                	pitfallDetailsTextArea.setCaretPosition(0); // scroll back to top
             	}
         	}
         });
