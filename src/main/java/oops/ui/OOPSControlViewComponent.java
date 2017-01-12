@@ -246,15 +246,33 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
 						List<ElementPair> mightBeInverseRelations = evaluationResult.getMightBeInverseRelations();
 						
+						if (mightBeInverseRelations != null && mightBeInverseRelations.size() > 0) {
+							pitfallText += "<p>OOPS! has the following suggestions for the relationships without inverse:</p>";
+						}
+						
 						for (ElementPair pair : mightBeInverseRelations) {
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
 									"</a> could be inverse of <a href=" + pair.getElementB() + ">" +
 									pair.getElementB() + "</a>" + "</p>";
 						}
 						
+						List<String> relationsWithoutInverse = evaluationResult.getRelationsWithoutInverse();
+						
+						if (relationsWithoutInverse != null && relationsWithoutInverse.size() > 0) {
+							pitfallText += "<p>Sorry, OOPS! has no suggestions for the following relationships without inverse:</p>";
+						}
+						
+						for (String relationWithoutInverse : relationsWithoutInverse) {
+							pitfallText += "<p>> <a href=" + relationWithoutInverse + ">" + relationWithoutInverse + "</a></p>";
+						}
+						
 						break;
 					case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
 						List<ElementPair> wrongInverseRelations = evaluationResult.getWrongInverseRelations();
+						
+						if (wrongInverseRelations.size() > 0) {
+							pitfallText += "<p>OOPS! has the following suggestions for the relationships without inverse:</p>";
+						}
 						
 						for (ElementPair pair : wrongInverseRelations) {
 							pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 

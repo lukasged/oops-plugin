@@ -22,6 +22,7 @@ public class EvaluationResult {
     private List<ElementPair> equivalentAttributes;
     private List<ElementPair> wrongInverseRelations;
     private List<ElementPair> mightBeInverseRelations;
+    private List<String> relationsWithoutInverse;
     
     public EvaluationResult() {}
     
@@ -196,4 +197,18 @@ public class EvaluationResult {
     	
     	return pitfallsWithAffectedElements;
     }
+
+	/**
+	 * @return the relationsWithoutInverse
+	 */
+	public List<String> getRelationsWithoutInverse() {
+		return relationsWithoutInverse;
+	}
+
+	/**
+	 * @param relationsWithoutInverse the relationsWithoutInverse to set
+	 */
+	public void setRelationsWithoutInverse(List<String> relationsWithoutInverse) {
+		this.relationsWithoutInverse = relationsWithoutInverse;
+	}
 }

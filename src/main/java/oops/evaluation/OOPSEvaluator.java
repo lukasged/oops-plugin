@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -68,6 +69,7 @@ public class OOPSEvaluator {
 	private static final String OOPS_TAG_EQUIVALENT_PROPERTY = OOPS_XML_PREFIX + "MightBeEquivalentProperty";
 	private static final String OOPS_TAG_EQUIVALENT_ATTRIBUTE = OOPS_XML_PREFIX + "MightBeEquivalentAttribute";
 	private static final String OOPS_TAG_EQUIVALENT_CLASSES = OOPS_XML_PREFIX + "MightBeEquivalentClass";
+	private static final String OOPS_TAG_NO_INVERSE_SUGGESTION = OOPS_XML_PREFIX + "NoInverseSuggestion";
 	
 	public static final String PITFALL_WRONG_INVERSE_ID = "P05";
 	public static final String PITFALL_MIGHT_BE_INVERSE_ID = "P13";
@@ -310,9 +312,10 @@ public class OOPSEvaluator {
 					
 					break;
 				case PITFALL_MIGHT_BE_INVERSE_ID:
+					// MIGHT BE INVERSE
 					NodeList mightBeInverseList = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_MIGHT_BE_INVERSE);
 					
-					ArrayList<ElementPair> inverseRelations = new ArrayList<ElementPair>();
+					List<ElementPair> inverseRelations = new ArrayList<ElementPair>();
 					
 					for (int j = 0; j < mightBeInverseList.getLength(); j++) {
 						Element mightBeInverseNode = (Element) mightBeInverseList.item(j);
@@ -339,6 +342,37 @@ public class OOPSEvaluator {
 					}
 					
 					evaluationResults.setMightBeInverseRelations(inverseRelations);
+					
+					// NO INVERSE SUGGESTION
+					NodeList noInverseSuggestionNodes = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_NO_INVERSE_SUGGESTION);
+					
+					List<String> noInverseSuggestions = new ArrayList<String>();
+					
+					for (int j = 0; j < noInverseSuggestionNodes.getLength(); j++) {
+						Element noInverseNode = (Element) noInverseSuggestionNodes.item(j);
+						
+						NodeList inverseNodes = noInverseNode.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						
+						for (int nodeIndex = 0; nodeIndex < inverseNodes.getLength(); nodeIndex++) {
+							Node affectedElement = inverseNodes.item(nodeIndex);
+							String affectedElementIRI = affectedElement.getTextContent();
+							if (!detectedPitfalls.containsKey(affectedElementIRI)) {
+								detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(affectedElementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
+							
+							noInverseSuggestions.add(affectedElementIRI);
+						}
+					}
+					
+					evaluationResults.setRelationsWithoutInverse(noInverseSuggestions);
 					
 					break;
 				case PITFALL_WRONG_INVERSE_ID:

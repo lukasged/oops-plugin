@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -192,7 +193,11 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     		break;
     	case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
     		additionalInfoElements = evaluationResult.getMightBeInverseRelations();
-    		pitfallDetailsText += "\n\nThis relation could be inverse of:\n";
+    		
+    		if (additionalInfoElements != null && additionalInfoElements.size() > 0) {
+    			pitfallDetailsText += "\n\nThis relation could be inverse of:\n";
+    		}
+    		
     		break;
     	case OOPSEvaluator.PITFALL_WRONG_INVERSE_ID:
     		additionalInfoElements = evaluationResult.getWrongInverseRelations();
@@ -212,6 +217,21 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     					relatedPair.getElementB() : relatedPair.getElementA();
     			pitfallDetailsText += ">   " + equivalentClass + "\n";
     		}    		
+    	}
+		
+    	// if it's the pitfall P13, check if it has suggestions for elements without inverse relationships
+    	if (selectedPitfall.getPitfallID().equals(OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID)) {
+    		List<String> noInverseSuggestions = evaluationResult.getRelationsWithoutInverse();
+    		
+    		if (noInverseSuggestions != null && noInverseSuggestions.size() > 0) {
+    			Optional<String> noInverseSuggestion = noInverseSuggestions.stream()
+    				.filter(element -> element.equals(selectedEntityIRI))
+    				.findFirst();
+    			
+    			if (noInverseSuggestion.isPresent()) {
+    				pitfallDetailsText += "\n\nSorry, OOPS! has no suggestion for this relationship without inverse.";
+    			}
+    		}
     	}
     	
     	return pitfallDetailsText;
