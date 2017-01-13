@@ -7,10 +7,10 @@
                     <Property id="pluginId" value="oops.OOPSClassHierarchyViewComponent"/>
                 </Component>
                 <Component label="Object properties">
-                    <Property id="pluginId" value="org.protege.editor.owl.OWLObjectPropertyTree"/>
+                    <Property id="pluginId" value="oops.OOPSObjectPropertyHierarchyViewComponent"/>
                 </Component>
                 <Component label="Data properties">
-                    <Property id="pluginId" value="org.protege.editor.owl.OWLDataPropertyTree"/>
+                    <Property id="pluginId" value="oops.OOPSDataPropertyHierarchyViewComponent"/>
                 </Component>
                 <Component label="Annotation properties">
                     <Property id="pluginId" value="org.protege.editor.owl.OWLAnnotationPropertyTree"/>

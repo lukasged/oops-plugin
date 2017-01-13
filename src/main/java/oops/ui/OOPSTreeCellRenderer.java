@@ -1,6 +1,5 @@
 package oops.ui;
 
-import org.protege.editor.core.ui.util.Icons;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.inference.ReasonerPreferences.OptionalInferenceTask;

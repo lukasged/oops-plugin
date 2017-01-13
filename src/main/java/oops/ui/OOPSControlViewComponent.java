@@ -377,7 +377,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	public void onEvaluationDone(EvaluationResult result) {
 		this.evaluationResult = result;
 		evaluatingDialog.setVisible(false);
-		btnListAllPitfalls.setEnabled(true);
+		btnListAllPitfalls.setEnabled(true); // re-enable after the evaluation is done
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package oops.ui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.lang.reflect.InvocationTargetException;
@@ -19,7 +18,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.protege.editor.core.ui.util.Resettable;
@@ -102,7 +100,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         pitfallsTree = new JTree();
         pitfallsTree.setRootVisible(false); // hide the root node
-        pitfallsTree.setCellRenderer(new TreeCellRendererWithTooltip()); // enable custom CellRenderer
         pitfallsTree.addTreeSelectionListener(event -> {
         	DefaultMutableTreeNode node = (DefaultMutableTreeNode) pitfallsTree.getLastSelectedPathComponent();
         	
@@ -197,10 +194,15 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     	case OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID:
     		additionalInfoElements = evaluationResult.getMightBeInverseRelations();
     		
-    		if (additionalInfoElements != null && additionalInfoElements.size() > 0) {
+    		boolean mightBeInverse = additionalInfoElements.stream()
+    				.filter(pair -> 
+						pair.getElementA().equals(selectedEntityIRI) ||
+						pair.getElementA().equals(selectedEntityIRI))
+    				.count() > 0;
+    		
+    		if (additionalInfoElements != null && additionalInfoElements.size() > 0 && mightBeInverse) {
     			pitfallDetailsText += "\n\nThis relation could be inverse of:\n";
     		}
-    		
     		break;
     	case OOPSEvaluator.PITFALL_SAME_LABEL:
     		additionalInfoElements = evaluationResult.getElementsWithSameLabel();
@@ -220,9 +222,9 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     				.collect(Collectors.toList());
     		
     		for (ElementPair relatedPair : relatedPairs) {
-    			String equivalentClass = relatedPair.getElementA().equals(selectedEntityIRI) ?
+    			String relatedElementIRI = relatedPair.getElementA().equals(selectedEntityIRI) ?
     					relatedPair.getElementB() : relatedPair.getElementA();
-    			pitfallDetailsText += ">   " + equivalentClass + "\n";
+    			pitfallDetailsText += ">   " + relatedElementIRI + "\n";
     		}    		
     	}
 		
@@ -355,29 +357,10 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         }
         
 	}
-	
-    private static class TreeCellRendererWithTooltip extends DefaultTreeCellRenderer {
-        @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                boolean sel, boolean expanded, boolean leaf, int row,
-                boolean hasFocus) {
-            setToolTipText("foobar" + row);
-            return super.getTreeCellRendererComponent(tree, value, sel,
-                    expanded, leaf, row, hasFocus);
-        }
-    }
 
 	@Override
 	public void onEvaluationStarted() {
 		logger.info("IndividualPitfallsList received evaluation start event!!");
-		
-		try {
-			SwingUtilities.invokeAndWait(() -> {
-				pitfallsTree.setEnabled(false); // disable the pitfalls tree during evaluation
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			logger.error(e.getLocalizedMessage());
-		}
 	}
 
 	@Override
@@ -392,7 +375,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 		
 		try {
 			SwingUtilities.invokeAndWait(() -> {
-				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
 				selectionChanged(); // update view with the selected element
 				
 				pitfallsListLabel.setText(String.format("Detected pitfalls (total %d critical, %d important, %d minor)",
@@ -406,13 +388,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 	@Override
 	public void OnEvaluationException(Throwable exception) {
 		logger.info("IndividualPitfallsList received evaluation exception!!");
-		try {
-			SwingUtilities.invokeAndWait(() -> {
-				pitfallsTree.setEnabled(true); // re-enable the pitfalls tree
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			logger.error(e.getLocalizedMessage());
-		}
 	}
 
 }

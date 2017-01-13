@@ -88,8 +88,8 @@ public class OOPSEvaluator {
     private static ArrayList<EvaluationListener> listeners = new ArrayList<EvaluationListener>();
     
     private static EvaluationResult evaluationResults = null;
-    
-    /**
+
+	/**
      * A runnable task that completes the ontology evaluation process using the OOPS! Web Service
      */
     private static Runnable evaluationTask = () -> {
@@ -477,12 +477,12 @@ public class OOPSEvaluator {
         
         return evaluationResults;
 	}
-
-	/**
-	 * Resets the evaluation results to prepare for a new evaluation
+	
+    /**
+	 * @return the evaluationResults
 	 */
-	public void resetEvaluationResults() {
-		evaluationResults = null;
+	public static EvaluationResult getEvaluationResults() {
+		return evaluationResults;
 	}
 	
 	/**

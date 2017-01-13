@@ -1,6 +1,6 @@
 package oops.ui;
 
-import org.protege.editor.owl.ui.view.cls.ToldOWLClassHierarchyViewComponent;
+import org.protege.editor.owl.ui.view.objectproperty.OWLObjectPropertyHierarchyViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +16,12 @@ import java.lang.reflect.InvocationTargetException;
  * Author: Lukas Gedvilas<br>
  * Universidad Politécnica de Madrid<br><br>
  *
- * Customized ClassHierarchyViewComponent for OOPS! plugin. It evaluates the active ontology and sets the custom
+ * Customized ObjectPropertyHierarchyViewComponent for OOPS! plugin. It sets the custom
  * TreeCellRenderer to let the users find elements with pitfalls quickly and intuitively.
  */
-public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewComponent implements EvaluationListener {
+public class OOPSObjectPropertyHierarchyViewComponent extends OWLObjectPropertyHierarchyViewComponent implements EvaluationListener {
     
-    private static final Logger logger = LoggerFactory.getLogger(OOPSClassHierarchyViewComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(OOPSObjectPropertyHierarchyViewComponent.class);
     
     private OOPSEvaluator evaluator;
     
@@ -34,6 +34,12 @@ public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewCo
         evaluator = OOPSEvaluator.getInstance();
         
         evaluator.addListener(this);
+        
+        // if there already are existent results, update the UI with them
+        EvaluationResult existentResults = OOPSEvaluator.getEvaluationResults();
+        if (existentResults != null) {
+        	onEvaluationDone(existentResults);
+        }
     }
 
     @Override
@@ -45,14 +51,14 @@ public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewCo
 
 	@Override
 	public void onEvaluationStarted() {
-		logger.info("OOPSClassHierarchy received evaluation start event!!");
+		logger.debug("OOPSObjectPropertyHierarchy received evaluation start event!!");
 	}
 
 	@Override
 	public void onEvaluationDone(EvaluationResult result) {
 		evaluationResult = result;
 
-		logger.info("OOPSClassHierarchy received evaluation results!!");
+		logger.debug("OOPSObjectPropertyHierarchy received evaluation results!!");
 		
 		if (SwingUtilities.isEventDispatchThread()) {
 			getTree().setCellRenderer(new OOPSTreeCellRenderer(getOWLEditorKit(), evaluationResult));
@@ -69,6 +75,6 @@ public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewCo
 
 	@Override
 	public void OnEvaluationException(Throwable exception) {
-		logger.info("OOPSClassHierarchy received evaluation exception!!");
+		logger.debug("OOPSObjectPropertyHierarchy received evaluation exception!!");
 	}
 }

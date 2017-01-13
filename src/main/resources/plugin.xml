@@ -18,8 +18,20 @@
 	<extension id="OOPSClassHierarchyViewComponent" point="org.protege.editor.core.application.ViewComponent">
 		<label value="Class hierarchy"/>
 		<class value="oops.ui.OOPSClassHierarchyViewComponent"/>
-		<headerColor value="@org.protege.ontologycolor"/>
+		<headerColor value="@org.protege.classcolor"/>
 	</extension>	
+	
+	<extension id="OOPSObjectPropertyHierarchyViewComponent" point="org.protege.editor.core.application.ViewComponent">
+		<label value="Object properties"/>
+		<class value="oops.ui.OOPSObjectPropertyHierarchyViewComponent"/>
+		<headerColor value="@org.protege.objectpropertycolor"/>
+	</extension>
+	
+	<extension id="OOPSDataPropertyHierarchyViewComponent" point="org.protege.editor.core.application.ViewComponent">
+		<label value="Data properties"/>
+		<class value="oops.ui.OOPSDataPropertyHierarchyViewComponent"/>
+		<headerColor value="@org.protege.datapropertycolor"/>
+	</extension>
 	
 	<extension id="IndividualPitfallsListViewComponent" point="org.protege.editor.core.application.ViewComponent">
 		<label value="OOPS! Pitfalls for the selected element"/>
