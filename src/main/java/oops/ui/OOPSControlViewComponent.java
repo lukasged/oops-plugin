@@ -544,47 +544,27 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	        }
 	    };
 		
-		/*
-		JRadioButton btnStructDim = new JRadioButton(LABEL_STRUCTURAL_DIMENSION);
-		JRadioButton btnModDecisions = new JRadioButton(LABEL_MODELLING_DECISIONS);
-		JRadioButton btnWrongInferences = new JRadioButton(LABEL_WRONG_INFERENCE);
-		JRadioButton btnNoInference = new JRadioButton(LABEL_NO_INFERENCE);
-		JRadioButton btnOntoLanguage = new JRadioButton(LABEL_ONTO_LANGUAGE);
-		*/
-		
 		JPanel classByDimPanel = new JPanel(new BorderLayout());
 		classByDimPanel.setAlignmentX(LEFT_ALIGNMENT);
 		classByDimPanel.setBorder(CONFIG_DIALOG_CATEGORY_HEAD_BORDER);
 		classByDimPanel.setMaximumSize(CONFIG_DIALOG_CATEGORY_LABEL_DIM);
 		JLabel classByDimLabel = new JLabel(LABEL_CLASSIFICATION_BY_DIMENSION, SwingConstants.CENTER);
 		classByDimLabel.setFont(new Font("serif", Font.BOLD, 14));
-		//classByDimLabel.setHorizontalAlignment(JLabel.CENTER);
-		//classByDimLabel.setAlignmentX(CENTER_ALIGNMENT);
 		classByDimPanel.add(classByDimLabel, BorderLayout.CENTER);
 		leftPanel.add(classByDimPanel);
 		
 		// Structural Dimension
 		JPanel structDimHeaderPanel = new JPanel(new BorderLayout());
-		//structDimHeaderPanel.setLayout(new BoxLayout(structDimHeaderPanel, BoxLayout.Y_AXIS));
 		structDimHeaderPanel.setBackground(Color.LIGHT_GRAY);
-		//structDimHeaderPanel.setMaximumSize(new Dimension(500,15));
 		structDimHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
 		structDimHeaderPanel.setMaximumSize(CONFIG_DIALOG_CATEGORY_LABEL_DIM);
 		String pitfalls = Stream.of(pitfallCategories.get(LABEL_STRUCTURAL_DIMENSION))
 				.collect(Collectors.joining(", "));
-		//JRadioButton structDimHeaderBtn = new JRadioButton("<html>" + LABEL_STRUCTURAL_DIMENSION + ": checks for pitfalls " + pitfalls + "</html>");
 		JRadioButton structDimHeaderBtn = new JRadioButton("<html><b>" + LABEL_STRUCTURAL_DIMENSION + "</b></html>");
 		structDimHeaderBtn.setToolTipText("Checks for pitfalls " + pitfalls);
 		structDimHeaderBtn.setOpaque(false);
 		structDimHeaderBtn.setActionCommand(LABEL_STRUCTURAL_DIMENSION);
 		structDimHeaderBtn.addActionListener(listener);
-		//structDimHeaderBtn.setAlignmentX(LEFT_ALIGNMENT);
-		
-		GridBagConstraints gbc = new GridBagConstraints();
-		//gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.WEST;
-		//gbc.gridwidth = GridBagConstraints.RELATIVE;
-		//gbc.weightx = 1;
 		
 		structDimHeaderPanel.add(structDimHeaderBtn, BorderLayout.WEST);
 		allButtonsGroup.add(structDimHeaderBtn);
@@ -604,18 +584,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			allButtonsGroup.add(radioBtn);
 			structDimPanel.add(radioBtn);
 		}
-		
-		/*
-		buttons.add(new JRadioButton(LABEL_MODELLING_DECISIONS));
-		buttons.add(new JRadioButton(LABEL_WRONG_INFERENCE));
-		buttons.add(new JRadioButton(LABEL_NO_INFERENCE));
-		buttons.add(new JRadioButton(LABEL_ONTO_LANGUAGE));
-		
-		buttons.forEach(btn -> {
-			allButtonsGroup.add(btn);
-			structDimPanel.add(btn);
-		});
-		*/
 		
 		leftPanel.add(structDimPanel);
 		
@@ -687,15 +655,12 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		
 		leftPanel.add(usabilityDimPanel);
 		
-		//leftPanel.add(Box.createVerticalGlue()); // add glue so that it would absorb the extra space
-		
 		// RIGHT PANEL
 		JPanel rightPanel = new JPanel();
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 		rightPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 		
 		JPanel classByEvalCritPanel = new JPanel(new BorderLayout());
-		//classByEvalCritPanel.setLayout(new BoxLayout(classByEvalCritPanel, BoxLayout.X_AXIS));
 		classByEvalCritPanel.setAlignmentX(LEFT_ALIGNMENT);
 		classByEvalCritPanel.setBorder(CONFIG_DIALOG_CATEGORY_HEAD_BORDER);
 		classByEvalCritPanel.setMaximumSize(CONFIG_DIALOG_CATEGORY_LABEL_DIM);
