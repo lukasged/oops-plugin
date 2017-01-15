@@ -48,7 +48,7 @@ public class OOPSEvaluator {
     		+ "<OOPSRequest>"
     		+ "    <OntologyURI></OntologyURI>"
     		+ "    <OntologyContent><![CDATA[ %s ]]></OntologyContent>"
-    		+ "    <Pitfalls></Pitfalls>"
+    		+ "    <Pitfalls>%s</Pitfalls>"
     		+ "    <OutputFormat>XML</OutputFormat>"
     		+ "</OOPSRequest>";
     
@@ -83,6 +83,8 @@ public class OOPSEvaluator {
 
     private static OWLOntology activeOntology;
     
+    private static List<String> pitfallsSubset;
+    
     private static OOPSEvaluator instance = null;
     
     private static ArrayList<EvaluationListener> listeners = new ArrayList<EvaluationListener>();
@@ -108,7 +110,8 @@ public class OOPSEvaluator {
 			
 			String rdfFormattedOntology = rdfWriter.toString();
 			
-			String oopsRequestBody = String.format(OOPS_WS_REQUEST_TEMPLATE, rdfFormattedOntology);
+			String pitfallsField = pitfallsSubset.stream().collect(Collectors.joining(","));
+			String oopsRequestBody = String.format(OOPS_WS_REQUEST_TEMPLATE, rdfFormattedOntology, pitfallsField);
 			
 			String oopsResponse = sendOOPSRequest(oopsRequestBody);
 			
@@ -518,8 +521,9 @@ public class OOPSEvaluator {
 	 * @return the results after evaluating the given ontology
 	 * @throws InterruptedException
 	 */
-	public void evaluate(OWLOntology ontology) throws InterruptedException {
-		activeOntology = ontology;
+	public void evaluate(OWLOntology ontology, List<String> pitfallsSubset) throws InterruptedException {
+		OOPSEvaluator.activeOntology = ontology;
+		OOPSEvaluator.pitfallsSubset = pitfallsSubset;
 		
 		Thread thread = new Thread(evaluationTask);
 		thread.start();
