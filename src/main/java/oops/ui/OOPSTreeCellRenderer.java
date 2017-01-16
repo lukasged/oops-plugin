@@ -109,11 +109,9 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
     
     private EvaluationResult evaluationResult;
 
-	private boolean underlinedText;
+	private PitfallImportanceLevel importance;
 
-	private Color underlinedColor;
-
-
+	
     private class OWLCellRendererPanel extends JPanel {
         private OWLCellRendererPanel(LayoutManager layout) {
             super(layout);
@@ -221,7 +219,7 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
         focusedEntity = null;
         commentedOut = false;
         strikeThrough = false;
-        underlinedText = false;
+        importance = null;
         highlightUnsatisfiableClasses = true;
         highlightUnsatisfiableProperties = true;
         crossedOutEntities.clear();
@@ -262,6 +260,10 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
     public void setStrikeThrough(boolean strikeThrough) {
         this.strikeThrough = strikeThrough;
+    }
+    
+    public void setImportance(PitfallImportanceLevel importance) {
+    	this.importance = importance;
     }
 
     public int getPreferredWidth() {
@@ -333,15 +335,17 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
         preferredWidth = table.getParent().getWidth();
         componentBeingRendered = table;
         // Set the size of the table cell
-//        setPreferredWidth(table.getColumnModel().getColumn(column).getWidth());
+        // setPreferredWidth(table.getColumnModel().getColumn(column).getWidth());
         return prepareRenderer(value, isSelected, hasFocus);
     }
 
 
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
                                                   boolean leaf, int row, boolean hasFocus) {  	
+    	OWLObjectTreeNode node = null;
+    	
     	if (value instanceof OWLObjectTreeNode){
-            OWLObjectTreeNode node = (OWLObjectTreeNode) value;
+            node = (OWLObjectTreeNode) value;
             setEquivalentObjects(node.getEquivalentObjects());
             value = node.getOWLObject();
         }        
@@ -358,7 +362,7 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
         minTextHeight = 12;
 //        textPane.setBorder(BorderFactory.createEmptyBorder(1, 2, 1, 2 + rightMargin));
         tree.setToolTipText(value != null ? value.toString() : "");
-        Component c = prepareRenderer(value, selected, hasFocus);
+        Component c = prepareRendererOOPS(value, node, selected, hasFocus);
         reset();
         return c;
     }
@@ -452,8 +456,46 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
     private ActiveEntityVisitor activeEntityVisitor = new ActiveEntityVisitor();
 
-
     private Component prepareRenderer(Object value, boolean isSelected, boolean hasFocus) {
+        renderingComponent.setOpaque(isSelected || opaque);
+
+        if (value instanceof OWLEntity) {
+            OWLEntity entity = (OWLEntity) value;
+            OWLDeclarationAxiom declAx = getOWLModelManager().getOWLDataFactory().getOWLDeclarationAxiom(entity);
+            if (getOWLModelManager().getActiveOntology().containsAxiom(declAx)) {
+                ontology = getOWLModelManager().getActiveOntology();
+            }
+            entity.accept(activeEntityVisitor);
+            if (OWLUtilities.isDeprecated(getOWLModelManager(), entity)) {
+                setStrikeThrough(true);
+            }
+            else {
+                setStrikeThrough(false);
+            }
+        }
+
+
+        prepareTextPane(getRendering(value), isSelected);
+
+        if (isSelected) {
+            renderingComponent.setBackground(SELECTION_BACKGROUND);
+            textPane.setForeground(SELECTION_FOREGROUND);
+        }
+        else {
+            renderingComponent.setBackground(componentBeingRendered.getBackground());
+            textPane.setForeground(componentBeingRendered.getForeground());
+        }
+
+        final Icon icon = getIcon(value);
+        iconComponent.setIcon(icon);
+        renderingComponent.revalidate();
+        return renderingComponent;
+    }
+    
+    /**
+     * Custom renderer that changes differentiates the nodes with pitfalls
+     */
+    private Component prepareRendererOOPS(Object value, OWLObjectTreeNode node, boolean isSelected, boolean hasFocus) {
     	renderingComponent.setOpaque(isSelected || opaque);
         
         Icon icon = null;
@@ -474,14 +516,37 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             
             List<Pitfall> nodePitfalls = evaluationResult.getPitfallsForOWLEntity(entity.getIRI().toString());
             
-            if (nodePitfalls != null) { // node presents some pitfalls
+            String entityIRI = entity.getIRI().toString();
+            
+            if (entityIRI.equals("http://swrc.ontoware.org/ontology#Document")) {
+            	logger.debug("for debugging...");
+            }
+            
+            PitfallImportanceLevel childrensImportanceLevel = childrensMaxImportanceLevel(entity, node);
+            
+            // if node presents pitfalls
+            if (nodePitfalls != null) {
             	PitfallImportanceLevel mostImportantLevel = 
-            			evaluationResult.getHighestImportanceLevelForEntity(entity.getIRI().toString()).get();
+            			evaluationResult.getHighestImportanceLevelForEntity(entityIRI).get();
 
             	URL iconURL = this.getClass().getResource("/" + mostImportantLevel.toString().toLowerCase() + ".png");
             	Image scaledImage = new ImageIcon(iconURL).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT);
             	icon = new ImageIcon(scaledImage);
+            	
+            	// if the pitfalls of this node's children are more important
+            	if (childrensImportanceLevel != null && childrensImportanceLevel.ordinal() > 
+            		evaluationResult.getHighestImportanceLevelForEntity(entityIRI).get().ordinal()) {
+            		logger.debug(String.format("Children of %s have more important pitfalls of %s level!", 
+            				entity.getIRI().toString(), childrensImportanceLevel.toString()));
+            		setImportance(childrensImportanceLevel);
+            	}
             } else {
+            	
+            	if (childrensImportanceLevel != null) {
+            		logger.debug(String.format("Children of %s have pitfalls of %s level!", 
+            				entity.getIRI().toString(), childrensImportanceLevel.toString()));
+            		setImportance(childrensImportanceLevel);
+            	}
             	/*
             	if (childrenHavePitfalls(entity.asOWLClass())) {
             		setUnderlinedText(true);
@@ -512,33 +577,50 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
     }
     
 	/**
-	 * Returns true if this class or its children present any detected OOPS!
-	 * pitfall
+	 * Looks for the pitfalls of the children of the specified node and returns
+	 * the importance level of the most important pitfall found
 	 * 
-	 * @param owlClass
-	 *            the class to be inspected
-	 * @return true if this class or its children present any detected OOPS!
-	 *         pitfall
+	 * @param entity
+	 *            the OWL entity associated with the specified node
+	 * @param node
+	 *            the node whose children are to be checked
+	 * @return the highest importance level of the pitfalls of the children of
+	 *         the specified node
 	 */
-	private boolean childrenHavePitfalls(OWLClass owlClass) {
-		if (owlClass.isBottomEntity()) {
-			return (evaluationResult.getPitfallsForOWLEntity(owlClass.getIRI().toString()) != null);
+	private PitfallImportanceLevel childrensMaxImportanceLevel(OWLEntity entity, OWLObjectTreeNode node) {
+		if (node.isLeaf()) {
+			Optional<PitfallImportanceLevel> mostImportantLevel = 
+        			evaluationResult.getHighestImportanceLevelForEntity(entity.getIRI().toString());
+			if (mostImportantLevel.isPresent()) {
+				return mostImportantLevel.get();
+			} else {
+				return null;
+			}
 		} else {
-			Set<OWLSubClassOfAxiom> subClasses = getOWLModelManager().getActiveOntology()
-					.getSubClassAxiomsForSubClass(owlClass);
-
-			boolean pitfallFound = false;
-
-			for (OWLSubClassOfAxiom subClassAxiom : subClasses) {
-				if (childrenHavePitfalls(subClassAxiom.getSubClass().asOWLClass())) {
-					pitfallFound = true;
+			List<PitfallImportanceLevel> importanceLevels = new ArrayList<PitfallImportanceLevel>();
+			for (int i = 0; i < node.getChildCount(); i++) {
+				OWLObjectTreeNode child = (OWLObjectTreeNode) node.getChildAt(i);
+				Object childValue = child.getOWLObject();
+				OWLEntity childEntity = (OWLEntity) childValue;
+				PitfallImportanceLevel childImportanceLevel = childrensMaxImportanceLevel(childEntity, child);
+				if (childImportanceLevel != null) {
+					importanceLevels.add(childImportanceLevel);
 				}
 			}
-
-			return pitfallFound;
+			
+			Optional<PitfallImportanceLevel> mostImportantLevel = 
+        			evaluationResult.getHighestImportanceLevelForEntity(entity.getIRI().toString());
+			if (mostImportantLevel.isPresent()) {
+				importanceLevels.add(mostImportantLevel.get());
+			}
+			
+			if (importanceLevels.size() > 0) {
+				return Collections.max(importanceLevels);
+			} else {
+				return null;
+			}
 		}
 	}
-
 
     protected String getRendering(Object object) {
         if (object instanceof OWLObject) {
@@ -611,6 +693,12 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
     private Style foreground;
 
     private Style linkStyle;
+    
+    private Style minorPitfallStyle;
+    
+    private Style importantPitfallStyle;
+    
+    private Style criticalPitfallStyle;
 
     private Style inconsistentClassStyle;
 
@@ -661,6 +749,18 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
         linkStyle = doc.addStyle("LINK_STYLE", null);
         StyleConstants.setForeground(linkStyle, Color.BLUE);
         StyleConstants.setUnderline(linkStyle, true);
+        
+        minorPitfallStyle = doc.addStyle("MINOR_PITFALL_STYLE", null);
+        StyleConstants.setForeground(minorPitfallStyle, new Color(204, 204, 0));
+        StyleConstants.setUnderline(minorPitfallStyle, true);
+        
+        importantPitfallStyle = doc.addStyle("IMPORTANT_PITFALL_STYLE", null);
+        StyleConstants.setForeground(importantPitfallStyle, Color.ORANGE);
+        StyleConstants.setUnderline(importantPitfallStyle, true);
+        
+        criticalPitfallStyle = doc.addStyle("CRITICAL_PITFALL_STYLE", null);
+        StyleConstants.setForeground(criticalPitfallStyle, Color.RED);
+        StyleConstants.setUnderline(criticalPitfallStyle, true);
 
         inconsistentClassStyle = doc.addStyle("INCONSISTENT_CLASS_STYLE", null);
         StyleConstants.setForeground(inconsistentClassStyle, Color.RED);
@@ -716,6 +816,22 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
 
         if (strikeThrough) {
             doc.setParagraphAttributes(0, doc.getLength(), strikeOutStyle, false);
+        }
+        
+        if (importance != null) {
+        	switch (importance) {
+			case MINOR:
+				doc.setParagraphAttributes(0, doc.getLength(), minorPitfallStyle, false);
+				break;
+			case IMPORTANT:
+				doc.setParagraphAttributes(0, doc.getLength(), importantPitfallStyle, false);
+				break;
+			case CRITICAL:
+				doc.setParagraphAttributes(0, doc.getLength(), criticalPitfallStyle, false);
+				break;
+			default:
+				break;
+        	}
         }
 
         if (ontology != null) {

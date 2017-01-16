@@ -264,6 +264,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 	public void reset() {
         pitfallsTree.removeAll();
         pitfallsListLabel.setText("");
+        cardPanel.removeAll();
         validate();
         
         logger.info("IndividualPitfallsListComponent received reset event!!");
@@ -275,6 +276,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
     protected void disposeOWLView() {
         evaluator.removeListener(this);
+        pitfallsTree.removeAll();
+        pitfallsListLabel.setText("");
     }
 
     @Override
