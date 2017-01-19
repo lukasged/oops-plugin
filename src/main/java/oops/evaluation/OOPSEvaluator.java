@@ -78,10 +78,9 @@ public class OOPSEvaluator {
 	public static final String PITFALL_MIGHT_BE_EQUIVALENT_ID = "P12";
 	public static final String PITFALL_EQUIVALENT_CLASSES_ID = "P30";
 	public static final String PITFALL_SAME_LABEL = "P32";
-	public static final String PITFALL_DIFF_NAMING_CONVENTIONS_ID = "P22";
 	
 	// pitfalls that apply to the ontology in general
-	private static final String generalPitfalls[] = { "P22", "P38", "P39", "P41" };
+	private static final String generalPitfalls[] = { "P10", "P22", "P38", "P39", "P41" };
 	
 	private static final String OWL_THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
 
@@ -125,7 +124,8 @@ public class OOPSEvaluator {
 	        
 	        listeners.forEach(l -> l.onEvaluationDone(evaluationResults)); // send results to each listener
 		} catch (Exception e) {
-			logger.error(e.getLocalizedMessage());
+			logger.error("An exception has ocurred while evaluating the ontology! Exception message: "
+					+ e.getLocalizedMessage());
 			listeners.forEach(l -> l.OnEvaluationException(e));
 		}
     };
@@ -215,7 +215,11 @@ public class OOPSEvaluator {
 				String pitfallCode = pitfallCodeNode.getTextContent();
 				String pitfallName = pitfallNameNode.getTextContent();
 				String pitfallImportance = pitfallImportanceNode.getTextContent();
-				int pitfallNumAffectedElems = Integer.parseInt(pitfallNumAffectedElemsNode.getTextContent());
+				
+				int pitfallNumAffectedElems = 0;
+				if (pitfallNumAffectedElemsNode != null) {
+					pitfallNumAffectedElems = Integer.parseInt(pitfallNumAffectedElemsNode.getTextContent());
+				}
 				
 				switch (pitfallCode) {
 				case PITFALL_EQUIVALENT_CLASSES_ID:
@@ -441,32 +445,33 @@ public class OOPSEvaluator {
 					evaluationResults.setElementsWithSameLabel(elementsWithSameLabel);
 					
 					break;
-				case PITFALL_DIFF_NAMING_CONVENTIONS_ID:
-					detectedPitfalls.put(OWL_THING_IRI, new ArrayList<Pitfall>(Arrays.asList(new Pitfall(
-							PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
-							pitfallCode,
-							pitfallName,
-							pitfallDescription,
-							pitfallNumAffectedElems))));
-					
-					break;
 				default:
-					NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
-					for (int j = 0; j < affectedElements.getLength(); j++) {
-						Node affectedElement = affectedElements.item(j);
-						String affectedElementIRI = affectedElement.getTextContent();
-						
-						if (!detectedPitfalls.containsKey(affectedElementIRI)) {
-							detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+					if (isGeneralPitfall(pitfallCode)) {
+						// add pitfall to the root element of the owl ontology
+						detectedPitfalls.put(OWL_THING_IRI, new ArrayList<Pitfall>(Arrays.asList(new Pitfall(
+								PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+								pitfallCode,
+								pitfallName,
+								pitfallDescription,
+								pitfallNumAffectedElems))));
+					} else {
+						NodeList affectedElements = pitfallAffectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+						for (int j = 0; j < affectedElements.getLength(); j++) {
+							Node affectedElement = affectedElements.item(j);
+							String affectedElementIRI = affectedElement.getTextContent();
+							
+							if (!detectedPitfalls.containsKey(affectedElementIRI)) {
+								detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
+							}
+							
+							detectedPitfalls.get(affectedElementIRI).add(
+									new Pitfall(
+											PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
+											pitfallCode,
+											pitfallName,
+											pitfallDescription,
+											pitfallNumAffectedElems));
 						}
-						
-						detectedPitfalls.get(affectedElementIRI).add(
-								new Pitfall(
-										PitfallImportanceLevel.valueOf(pitfallImportance.toUpperCase()),
-										pitfallCode,
-										pitfallName,
-										pitfallDescription,
-										pitfallNumAffectedElems));
 					}
 				}
 			}
