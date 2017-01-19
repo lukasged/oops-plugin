@@ -179,9 +179,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			{"P41", "P41: No license declared"}
 	};
 	
-	// pitfalls that apply to the ontology in general
-	private static final String generalPitfalls[] = { "P22", "P38", "P39", "P41" };
-	
 	private static final HashMap<String, String[]> pitfallCategories = new HashMap<String, String[]>() {{
 		put(LABEL_MODELLING_DECISIONS, new String[]{"P02", "P03", "P03", "P07", "P21", "P24", "P25", "P26", "P33"});
 		put(LABEL_WRONG_INFERENCE, new String[]{"P05", "P06", "P19", "P27", "P28", "P29", "P31"});
@@ -382,7 +379,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					String importanceLevel = p.getImportanceLevel().toString();
 					String capitalizedImportance = importanceLevel.charAt(0) +
 							importanceLevel.toLowerCase().substring(1, importanceLevel.length());
-					String numCasesOrOntology = isGeneralPitfall(p.getPitfallID()) ? "ontology*" : cases;
+					String numCasesOrOntology = OOPSEvaluator.isGeneralPitfall(p.getPitfallID()) ? "ontology*" : cases;
 					JLabel pitfallNumCasesLabel = new JLabel(numCasesOrOntology + " | " + capitalizedImportance + " ");
 					pitfallNumCasesLabel.setOpaque(false);
 					pitfallNumCasesLabel.setFont(new Font("serif", Font.BOLD, 14));
@@ -803,27 +800,21 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			
 			break;
 		default:
-			pitfallText += "<p>This pitfall appears in the following elements:</p>";
+			if (OOPSEvaluator.isGeneralPitfall(pitfall.getPitfallID())) {
+				pitfallText += "<p>*This pitfall applies to the ontology in general instead of "
+						+ "specific elements.</p>";
+			} else {
+				pitfallText += "<p>This pitfall appears in the following elements:</p>";
 
-			for (String element : affectedElements) {
-				pitfallText += "<p>> " + element + "</p>";
+				for (String element : affectedElements) {
+					pitfallText += "<p>> " + element + "</p>";
+				}
 			}
 		}
 		
 		pitfallText += "</html>";
 		
 		return pitfallText;
-	}
-
-	/**
-	 * Returns true if the specified pitfall affects the ontology itself
-	 * 
-	 * @param pitfallCode
-	 *            the specified pitfall code
-	 * @return true if the specified pitfall affects the ontology itself
-	 */
-	private boolean isGeneralPitfall(String pitfallCode) {
-		return Stream.of(generalPitfalls).anyMatch(p -> p.equals(pitfallCode));
 	}
 	
 	@Override

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -78,6 +79,9 @@ public class OOPSEvaluator {
 	public static final String PITFALL_EQUIVALENT_CLASSES_ID = "P30";
 	public static final String PITFALL_SAME_LABEL = "P32";
 	public static final String PITFALL_DIFF_NAMING_CONVENTIONS_ID = "P22";
+	
+	// pitfalls that apply to the ontology in general
+	private static final String generalPitfalls[] = { "P22", "P38", "P39", "P41" };
 	
 	private static final String OWL_THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
 
@@ -479,6 +483,17 @@ public class OOPSEvaluator {
 		evaluationResults.setDetectedPitfalls(detectedPitfalls);
         
         return evaluationResults;
+	}
+	
+	/**
+	 * Returns true if the specified pitfall affects the ontology itself
+	 * 
+	 * @param pitfallCode
+	 *            the specified pitfall code
+	 * @return true if the specified pitfall affects the ontology itself
+	 */
+	public static boolean isGeneralPitfall(String pitfallCode) {
+		return Stream.of(generalPitfalls).anyMatch(p -> p.equals(pitfallCode));
 	}
 	
     /**

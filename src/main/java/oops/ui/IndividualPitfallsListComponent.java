@@ -214,33 +214,38 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     		break;
     	}
     	
-    	if (additionalInfoElements != null && additionalInfoElements.size() > 0) {
-    		List<ElementPair> relatedPairs = additionalInfoElements.stream()
-    				.filter(pair -> 
-    					pair.getElementA().equals(selectedEntityIRI) || 
-    					pair.getElementB().equals(selectedEntityIRI))
-    				.collect(Collectors.toList());
+    	if (OOPSEvaluator.isGeneralPitfall(selectedPitfall.getPitfallID())) {
+    		pitfallDetailsText += "\n\n*This pitfall applies to the ontology in general instead of specific elements.";
+    	} else {
+        	if (additionalInfoElements != null && additionalInfoElements.size() > 0) {
+        		List<ElementPair> relatedPairs = additionalInfoElements.stream()
+        				.filter(pair -> 
+        					pair.getElementA().equals(selectedEntityIRI) || 
+        					pair.getElementB().equals(selectedEntityIRI))
+        				.collect(Collectors.toList());
+        		
+        		for (ElementPair relatedPair : relatedPairs) {
+        			String relatedElementIRI = relatedPair.getElementA().equals(selectedEntityIRI) ?
+        					relatedPair.getElementB() : relatedPair.getElementA();
+        			pitfallDetailsText += ">   " + relatedElementIRI + "\n";
+        		}    		
+        	}
     		
-    		for (ElementPair relatedPair : relatedPairs) {
-    			String relatedElementIRI = relatedPair.getElementA().equals(selectedEntityIRI) ?
-    					relatedPair.getElementB() : relatedPair.getElementA();
-    			pitfallDetailsText += ">   " + relatedElementIRI + "\n";
-    		}    		
-    	}
-		
-    	// if it's the pitfall P13, check if it has suggestions for elements without inverse relationships
-    	if (selectedPitfall.getPitfallID().equals(OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID)) {
-    		List<String> noInverseSuggestions = evaluationResult.getRelationsWithoutInverse();
-    		
-    		if (noInverseSuggestions != null && noInverseSuggestions.size() > 0) {
-    			Optional<String> noInverseSuggestion = noInverseSuggestions.stream()
-    				.filter(element -> element.equals(selectedEntityIRI))
-    				.findFirst();
-    			
-    			if (noInverseSuggestion.isPresent()) {
-    				pitfallDetailsText += "\n\nSorry, OOPS! has no suggestion for this relationship without inverse.";
-    			}
-    		}
+        	// if it's the pitfall P13, check if it has suggestions for elements without inverse relationships
+        	if (selectedPitfall.getPitfallID().equals(OOPSEvaluator.PITFALL_MIGHT_BE_INVERSE_ID)) {
+        		List<String> noInverseSuggestions = evaluationResult.getRelationsWithoutInverse();
+        		
+        		if (noInverseSuggestions != null && noInverseSuggestions.size() > 0) {
+        			Optional<String> noInverseSuggestion = noInverseSuggestions.stream()
+        				.filter(element -> element.equals(selectedEntityIRI))
+        				.findFirst();
+        			
+        			if (noInverseSuggestion.isPresent()) {
+        				pitfallDetailsText += "\n\nSorry, OOPS! has no suggestion for this relationship "
+        						+ "without inverse.";
+        			}
+        		}
+        	}
     	}
     	
     	return pitfallDetailsText;
