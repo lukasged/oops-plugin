@@ -179,6 +179,9 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			{"P41", "P41: No license declared"}
 	};
 	
+	// pitfalls that apply to the ontology in general
+	private static final String generalPitfalls[] = { "P22", "P38", "P39", "P41" };
+	
 	private static final HashMap<String, String[]> pitfallCategories = new HashMap<String, String[]>() {{
 		put(LABEL_MODELLING_DECISIONS, new String[]{"P02", "P03", "P03", "P07", "P21", "P24", "P25", "P26", "P33"});
 		put(LABEL_WRONG_INFERENCE, new String[]{"P05", "P06", "P19", "P27", "P28", "P29", "P31"});
@@ -728,8 +731,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			pitfallText += "<p>The following classes might be equivalent:</p>";
 
 			for (ElementPair pair : equivalentClasses) {
-				pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
-						+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+				pitfallText += "<p>> " + pair.getElementA() + ", " + pair.getElementB() + "</p>";
 			}
 			
 			break;
@@ -741,8 +743,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 				pitfallText += "<p>The following relations could be defined as equivalent:</p>";
 				
 				for (ElementPair pair : equivalentProperties) {
-					pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() +
-							"</a>, <a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a></p>";
+					pitfallText += "<p>> " + pair.getElementA() + ", " + pair.getElementB() + "</p>";
 				}
 			}
 			
@@ -750,8 +751,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 				pitfallText += "<br><p>The following attributes could be defined as equivalent:</p>";
 				
 				for (ElementPair pair : equivalentAttributes) {
-					pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() +
-							"</a>, <a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a></p>";
+					pitfallText += "<p>> " + pair.getElementA() + ", " + pair.getElementB() + "</p>";
 				}
 			}
 
@@ -764,9 +764,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			}
 			
 			for (ElementPair pair : mightBeInverseRelations) {
-				pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
-						"</a> could be inverse of <a href=" + pair.getElementB() + ">" +
-						pair.getElementB() + "</a>" + "</p>";
+				pitfallText += "<p>> " + pair.getElementA() + " could be inverse of " + pair.getElementB() + "</p>";
 			}
 			
 			List<String> relationsWithoutInverse = evaluationResult.getRelationsWithoutInverse();
@@ -776,7 +774,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			}
 			
 			for (String relationWithoutInverse : relationsWithoutInverse) {
-				pitfallText += "<p>> <a href=" + relationWithoutInverse + ">" + relationWithoutInverse + "</a></p>";
+				pitfallText += "<p>> " + relationWithoutInverse + "</p>";
 			}
 			
 			break;
@@ -788,8 +786,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			}
 			
 			for (ElementPair pair : elementsWithSameLabel) {
-				pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + "</a>, "
-						+ "<a href=" + pair.getElementB() + ">" + pair.getElementB() + "</a>" + "</p>";
+				pitfallText += "<p>> " + pair.getElementA() + ", " + pair.getElementB() + "</p>";
 			}
 			
 			break;
@@ -801,9 +798,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			}
 			
 			for (ElementPair pair : wrongInverseRelations) {
-				pitfallText += "<p>> <a href=" + pair.getElementA() + ">" + pair.getElementA() + 
-						"</a> may not be inverse of <a href=" + pair.getElementB() + ">" + 
-						pair.getElementB() + "</a>" + "</p>";
+				pitfallText += "<p>> " + pair.getElementA() + " may not be inverse of " + pair.getElementB() + "</p>";
 			}
 			
 			break;
@@ -811,7 +806,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			pitfallText += "<p>This pitfall appears in the following elements:</p>";
 
 			for (String element : affectedElements) {
-				pitfallText += "<p>> <a href=" + element + ">" + element + "</a></p>";
+				pitfallText += "<p>> " + element + "</p>";
 			}
 		}
 		
@@ -828,7 +823,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	 * @return true if the specified pitfall affects the ontology itself
 	 */
 	private boolean isGeneralPitfall(String pitfallCode) {
-		return pitfallCode.equals(OOPSEvaluator.PITFALL_DIFF_NAMING_CONVENTIONS_ID);
+		return Stream.of(generalPitfalls).anyMatch(p -> p.equals(pitfallCode));
 	}
 	
 	@Override
