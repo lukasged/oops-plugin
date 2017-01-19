@@ -29,6 +29,8 @@ import org.w3c.dom.NodeList;
 
 import oops.model.ElementPair;
 import oops.model.EvaluationResult;
+import oops.model.InfoElement;
+import oops.model.InfoElementWithAffectedElems;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
 
@@ -72,6 +74,8 @@ public class OOPSEvaluator {
 	private static final String OOPS_TAG_EQUIVALENT_CLASSES = OOPS_XML_PREFIX + "MightBeEquivalentClass";
 	private static final String OOPS_TAG_NO_INVERSE_SUGGESTION = OOPS_XML_PREFIX + "NoInverseSuggestion";
 	private static final String OOPS_TAG_SAME_LABEL = OOPS_XML_PREFIX + "HaveSameLabel";
+	private static final String OOPS_TAG_SUGGESTION = OOPS_XML_PREFIX + "Suggestion";
+	private static final String OOPS_TAG_WARNING = OOPS_XML_PREFIX + "Warning";
 	
 	public static final String PITFALL_WRONG_INVERSE_ID = "P05";
 	public static final String PITFALL_MIGHT_BE_INVERSE_ID = "P13";
@@ -478,6 +482,79 @@ public class OOPSEvaluator {
 		}
         
 		evaluationResults.setDetectedPitfalls(detectedPitfalls);
+		
+		// SUGGESTIONS
+		NodeList suggestionsList = parsedResponse.getElementsByTagName(OOPS_TAG_SUGGESTION);
+		
+		if (suggestionsList.getLength() == 0) {
+			logger.debug("There are no suggestions!");
+		} else {
+			logger.debug(String.format("There are %d suggestions!", suggestionsList.getLength()));
+			List<InfoElementWithAffectedElems> suggestions = new ArrayList<InfoElementWithAffectedElems>();
+			
+			for (int i = 0; i < suggestionsList.getLength(); i++) {
+				Element suggestion = (Element) suggestionsList.item(i);
+				Node elemDescriptionNode = suggestion.getElementsByTagName(OOPS_TAG_DESCRIPTION).item(0);
+				Node elemNameNode = suggestion.getElementsByTagName(OOPS_TAG_NAME).item(0);
+				Node numAffectedElemsNode = suggestion.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
+				Element affectsElement = (Element) suggestion.getElementsByTagName(OOPS_TAG_AFFECTS).item(0);
+
+				String description = elemDescriptionNode.getTextContent();
+				String name = elemNameNode.getTextContent();
+				int numAffectedElems = Integer.parseInt(numAffectedElemsNode.getTextContent());
+				
+				List<String> affectedElements = new ArrayList<String>();
+				NodeList affectedElementNodes = affectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+				
+				for (int j = 0; j < affectedElementNodes.getLength(); j++) {
+					Node affectedElement = affectedElementNodes.item(j);
+					String affectedElementIRI = affectedElement.getTextContent();
+					
+					affectedElements.add(affectedElementIRI);
+				}
+				
+				suggestions.add(new InfoElementWithAffectedElems(name, description, numAffectedElems, 
+						affectedElements));
+			}
+			
+			evaluationResults.setSuggestions(suggestions);
+		}
+		
+		// WARNINGS
+		NodeList warningsList = parsedResponse.getElementsByTagName(OOPS_TAG_WARNING);
+		
+		if (warningsList.getLength() == 0) {
+			logger.debug("There are no warnings!");
+		} else {
+			logger.debug(String.format("There are %d warnings!", warningsList.getLength()));
+			List<InfoElementWithAffectedElems> warnings = new ArrayList<InfoElementWithAffectedElems>();
+			
+			for (int i = 0; i < warningsList.getLength(); i++) {
+				Element warning = (Element) warningsList.item(i);
+				Node elemDescriptionNode = warning.getElementsByTagName(OOPS_TAG_DESCRIPTION).item(0);
+				Node elemNameNode = warning.getElementsByTagName(OOPS_TAG_NAME).item(0);
+				Node numAffectedElemsNode = warning.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
+				Element affectsElement = (Element) warning.getElementsByTagName(OOPS_TAG_AFFECTS).item(0);
+
+				String description = elemDescriptionNode.getTextContent();
+				String name = elemNameNode.getTextContent();
+				int numAffectedElems = Integer.parseInt(numAffectedElemsNode.getTextContent());
+				
+				List<String> affectedElements = new ArrayList<String>();
+				NodeList affectedElementNodes = affectsElement.getElementsByTagName(OOPS_TAG_AFFECTED_ELEM);
+				
+				for (int j = 0; j < affectedElementNodes.getLength(); j++) {
+					Node affectedElement = affectedElementNodes.item(j);
+					String affectedElementIRI = affectedElement.getTextContent();
+					
+					affectedElements.add(affectedElementIRI);
+				}
+				
+				warnings.add(new InfoElementWithAffectedElems(name, description, numAffectedElems, affectedElements));
+			}
+			
+			evaluationResults.setWarnings(warnings);
+		}
         
         return evaluationResults;
 	}

@@ -23,6 +23,8 @@ public class EvaluationResult {
     private List<ElementPair> wrongInverseRelations;
     private List<ElementPair> mightBeInverseRelations;
     private List<String> relationsWithoutInverse;
+    private List<InfoElementWithAffectedElems> suggestions;
+    private List<InfoElementWithAffectedElems> warnings;
     
     public EvaluationResult() {}
     
@@ -210,5 +212,33 @@ public class EvaluationResult {
 	 */
 	public void setRelationsWithoutInverse(List<String> relationsWithoutInverse) {
 		this.relationsWithoutInverse = relationsWithoutInverse;
+	}
+
+	/**
+	 * @return the suggestions
+	 */
+	public List<InfoElementWithAffectedElems> getSuggestions() {
+		return suggestions;
+	}
+
+	/**
+	 * @param suggestions the suggestions to set
+	 */
+	public void setSuggestions(List<InfoElementWithAffectedElems> suggestions) {
+		this.suggestions = suggestions;
+	}
+
+	/**
+	 * @return the warnings
+	 */
+	public List<InfoElementWithAffectedElems> getWarnings() {
+		return warnings;
+	}
+
+	/**
+	 * @param warnings the warnings to set
+	 */
+	public void setWarnings(List<InfoElementWithAffectedElems> warnings) {
+		this.warnings = warnings;
 	}
 }

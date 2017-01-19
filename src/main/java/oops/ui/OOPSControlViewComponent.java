@@ -52,6 +52,7 @@ import oops.evaluation.EvaluationListener;
 import oops.evaluation.OOPSEvaluator;
 import oops.model.ElementPair;
 import oops.model.EvaluationResult;
+import oops.model.InfoElementWithAffectedElems;
 import oops.model.Pitfall;
 
 /**
@@ -352,6 +353,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 			
 			TreeMap<Pitfall, ArrayList<String>> pitfalls = evaluationResult.pitfallsWithAffectedElements();
 			
+			List<InfoElementWithAffectedElems> allInfoElems;
+			
 			if (pitfalls.size() > 0) {
 				pitfalls.forEach((p, elements) -> {
 					JPanel pitfallLabelHolder = new JPanel();
@@ -421,7 +424,80 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 					contentPane.add(pitfallLabelHolder);
 					contentPane.add(pitfallDescriptionLabel);
 				});
-				
+			}
+			
+			// SUGGESTIONS AND WARNINGS
+			List<InfoElementWithAffectedElems> suggestions = evaluationResult.getSuggestions();
+			List<InfoElementWithAffectedElems> warnings = evaluationResult.getWarnings();
+			
+			allInfoElems = new ArrayList<>();
+			if (suggestions != null) {
+				allInfoElems.addAll(suggestions);
+			}
+			if (warnings != null) {
+				allInfoElems.addAll(warnings);
+			}
+			
+			if (allInfoElems.size() > 0) {
+				allInfoElems.forEach(infoElem -> {
+					JPanel labelHolder = new JPanel();
+					labelHolder.setLayout(new BorderLayout());
+					labelHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
+					labelHolder.setBackground(COLOR_PITFALL_ID_BACKGROUND); // same as in OOPS! website
+					labelHolder.setAlignmentX(LEFT_ALIGNMENT);
+					labelHolder.setMaximumSize(new Dimension(
+							(int) pitfallsListDialog.getSize().getWidth() - LIST_PITFALLS_BORDER_MARGIN * 3, 1000));
+					
+					labelHolder.addMouseListener(new MouseAdapter() {
+						public void mouseEntered(MouseEvent me) {
+							labelHolder.setBackground(COLOR_PITFALL_ID_BACKGROUND_HOVER);
+						}
+
+						public void mouseExited(MouseEvent me) {
+							labelHolder.setBackground(COLOR_PITFALL_ID_BACKGROUND);
+						}
+					});
+					
+					JLabel nameLabel = new JLabel(infoElem.getName());
+					nameLabel.setFont(new Font("serif", Font.BOLD, 14));
+					
+					String cases = infoElem.getNumAffectedElements() + " case" + 
+							(infoElem.getNumAffectedElements() != 1 ? "s" : "");
+					JLabel numCasesLabel = new JLabel(cases);
+					numCasesLabel.setOpaque(false);
+					numCasesLabel.setFont(new Font("serif", Font.BOLD, 14));
+					
+					JPanel rightSidePanel = new JPanel();
+					rightSidePanel.setLayout(new BoxLayout(rightSidePanel, BoxLayout.X_AXIS));
+					rightSidePanel.add(numCasesLabel);
+					rightSidePanel.setOpaque(false);
+					
+					labelHolder.add(nameLabel, BorderLayout.WEST);
+					labelHolder.add(rightSidePanel, BorderLayout.EAST);
+					
+					String formattedDescription = getFormattedDescription(infoElem);
+					
+					JLabel descriptionLabel = new JLabel(formattedDescription);
+					descriptionLabel.setVisible(false);
+					descriptionLabel.setOpaque(true);
+					descriptionLabel.setBackground(COLOR_PITFALL_BACKGROUND);
+					descriptionLabel.setAlignmentX(LEFT_ALIGNMENT);
+					descriptionLabel.setMaximumSize(new Dimension((int) pitfallsListDialog.getSize().getWidth()
+							- LIST_PITFALLS_BORDER_MARGIN * 3, 1000));
+					descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+					
+					labelHolder.addMouseListener(new MouseAdapter() {
+						public void mouseClicked(MouseEvent me) {
+							descriptionLabel.setVisible(!descriptionLabel.isVisible());
+						}
+					});
+					
+					contentPane.add(labelHolder);
+					contentPane.add(descriptionLabel);
+				});
+			}
+			
+			if (pitfalls.size() > 0 || allInfoElems.size() > 0) {
 				JLabel referencesLabel = new JLabel(
 						"<html><p>References:</p>" + OOPS_RESULTS_REFERENCES_TEXT + "</html>");
 				referencesLabel.setMaximumSize(new Dimension(
@@ -435,7 +511,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 											"<p>Congratulations for applying the best practices. Keep it going!</p>" +
 										"</html>";
 				JLabel noPitfallsLabel = new JLabel(noPitfallsText);
-				
 				contentPane.add(noPitfallsLabel);
 			}
 			
@@ -449,7 +524,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		
 		getView().setShowViewBar(false); // disable view label bar
 	}
-	
+
 	/**
 	 * Changes the card showed in the card layout when radio buttons are pressed
 	 */
@@ -814,6 +889,25 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		pitfallText += "</html>";
 		
 		return pitfallText;
+	}
+	
+	/**
+	 * Returns the formatted description for the given info element
+	 * 
+	 * @param infoElem
+	 *            the info element for which the description is to be generated
+	 * @return the formatted description for the given info element
+	 */
+	private String getFormattedDescription(InfoElementWithAffectedElems infoElem) {
+		String formattedText = "<html><br><p>" + infoElem.getDescription() + "</p>";
+		
+		for (String element : infoElem.getAffectedElements()) {
+			formattedText += "<p>> " + element + "</p>";
+		}
+		
+		formattedText += "</html>";
+		
+		return formattedText;
 	}
 	
 	@Override
