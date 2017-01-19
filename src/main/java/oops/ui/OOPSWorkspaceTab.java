@@ -30,8 +30,6 @@ import java.util.Optional;
 public class OOPSWorkspaceTab extends WorkspaceViewsTab implements SelectionPlane {
 
     private Optional<JComponent> lastEntityDisplayCandidate = Optional.empty();
-    
-    private static final Logger log = LoggerFactory.getLogger(OOPSWorkspaceTab.class);
 
     private OWLEntityDisplayProvider provider = new OWLEntityDisplayProvider() {
 
@@ -82,14 +80,12 @@ public class OOPSWorkspaceTab extends WorkspaceViewsTab implements SelectionPlan
         super.initialise();
         selectionPlaneDelegate = new SelectionPlaneImpl(getOWLEditorKit().getOWLWorkspace().getOWLSelectionModel());
         getOWLEditorKit().getWorkspace().registerOWLEntityDisplayProvider(provider);
-        log.info("OOPS! workspace tab initialized");
     }
 
 
     public void dispose() {
         getOWLEditorKit().getWorkspace().unregisterOWLEntityDisplayProvider(provider);
         super.dispose();
-        log.info("OOPS! workspace tab disposed");
     }
 
     @Override

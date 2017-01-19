@@ -539,7 +539,6 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	            JRadioButton btn = (JRadioButton) e.getSource();
-	            logger.debug("Selected Button = " + btn.getActionCommand());
 	            selectedCategory = btn.getActionCommand(); // save the selected category
 	        }
 	    };

@@ -45,14 +45,14 @@ public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewCo
 
 	@Override
 	public void onEvaluationStarted() {
-		logger.info("OOPSClassHierarchy received evaluation start event!!");
+		logger.debug("OOPSClassHierarchy received evaluation start event!!");
 	}
 
 	@Override
 	public void onEvaluationDone(EvaluationResult result) {
 		evaluationResult = result;
 
-		logger.info("OOPSClassHierarchy received evaluation results!!");
+		logger.debug("OOPSClassHierarchy received evaluation results!!");
 		
 		if (SwingUtilities.isEventDispatchThread()) {
 			getTree().setCellRenderer(new OOPSTreeCellRenderer(getOWLEditorKit(), evaluationResult));
@@ -69,6 +69,6 @@ public class OOPSClassHierarchyViewComponent extends ToldOWLClassHierarchyViewCo
 
 	@Override
 	public void OnEvaluationException(Throwable exception) {
-		logger.info("OOPSClassHierarchy received evaluation exception!!");
+		logger.debug("OOPSClassHierarchy received evaluation exception!!");
 	}
 }

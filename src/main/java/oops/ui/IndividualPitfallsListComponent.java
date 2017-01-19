@@ -271,8 +271,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         pitfallsListLabel.setText("");
         cardPanel.removeAll();
         validate();
-        
-        logger.info("IndividualPitfallsListComponent received reset event!!");
     }
 
     private void selectPanel(String name) {
@@ -332,7 +330,6 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
             
     		if (detectedPitfalls != null) {
     			for (Pitfall pitfall : detectedPitfalls) {
-    				logger.info("Adding pitfall: " + pitfall + " for the entity " + selectedEntityIRI);
     				switch (pitfall.getImportanceLevel()) {
     				case MINOR:
     					minor.add(new DefaultMutableTreeNode(
@@ -368,12 +365,12 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
 	@Override
 	public void onEvaluationStarted() {
-		logger.info("IndividualPitfallsList received evaluation start event!!");
+		logger.debug("IndividualPitfallsList received evaluation start event!!");
 	}
 
 	@Override
 	public void onEvaluationDone(EvaluationResult result) {
-		logger.info("IndividualPitfallsList received evaluation results!!");
+		logger.debug("IndividualPitfallsList received evaluation results!!");
 		
 		evaluationResult = result;
 		
@@ -395,7 +392,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 
 	@Override
 	public void OnEvaluationException(Throwable exception) {
-		logger.info("IndividualPitfallsList received evaluation exception!!");
+		logger.debug("IndividualPitfallsList received evaluation exception!!");
 	}
 
 }

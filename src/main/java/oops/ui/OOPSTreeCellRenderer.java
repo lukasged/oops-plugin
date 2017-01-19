@@ -518,10 +518,6 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             
             String entityIRI = entity.getIRI().toString();
             
-            if (entityIRI.equals("http://swrc.ontoware.org/ontology#Document")) {
-            	logger.debug("for debugging...");
-            }
-            
             PitfallImportanceLevel childrensImportanceLevel = childrensMaxImportanceLevel(entity, node);
             
             // if node presents pitfalls
@@ -536,24 +532,13 @@ public class OOPSTreeCellRenderer implements TableCellRenderer, TreeCellRenderer
             	// if the pitfalls of this node's children are more important
             	if (childrensImportanceLevel != null && childrensImportanceLevel.ordinal() > 
             		evaluationResult.getHighestImportanceLevelForEntity(entityIRI).get().ordinal()) {
-            		logger.debug(String.format("Children of %s have more important pitfalls of %s level!", 
-            				entity.getIRI().toString(), childrensImportanceLevel.toString()));
             		setImportance(childrensImportanceLevel);
             	}
             } else {
             	
             	if (childrensImportanceLevel != null) {
-            		logger.debug(String.format("Children of %s have pitfalls of %s level!", 
-            				entity.getIRI().toString(), childrensImportanceLevel.toString()));
             		setImportance(childrensImportanceLevel);
             	}
-            	/*
-            	if (childrenHavePitfalls(entity.asOWLClass())) {
-            		setUnderlinedText(true);
-            		icon = Icons.getIcon("error.png");
-            		setUnderlinedColor(Color.RED);
-            	}
-            	*/
             }
             
         }

@@ -102,7 +102,6 @@ public class OOPSEvaluator {
     	listeners.forEach(l -> l.onEvaluationStarted()); // notify all listeners about evaluation start
     	
     	Instant startInstant = Instant.now();
-    	logger.info(String.format("evaluationTask[OOPSEvaluator] in thread %s", Thread.currentThread().getName()));
 		
 		activeOntology.getOWLOntologyManager();
 		
@@ -118,8 +117,6 @@ public class OOPSEvaluator {
 			String oopsRequestBody = String.format(OOPS_WS_REQUEST_TEMPLATE, rdfFormattedOntology, pitfallsField);
 			
 			String oopsResponse = sendOOPSRequest(oopsRequestBody);
-			
-			logger.info("The oopsResponse is -> " + oopsResponse);
 			
 			evaluationResults = getResultsFromResponse(oopsResponse);
 	        
@@ -159,8 +156,6 @@ public class OOPSEvaluator {
 		connection.setRequestMethod("POST");
 		connection.setReadTimeout(OOPS_WS_TIMEOUT);
 		
-		logger.info("Preparing for OOPS! WS post request...");
-		
 		// Send POST request
 		connection.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
@@ -169,8 +164,6 @@ public class OOPSEvaluator {
 		wr.close();
 		
 		int responseCode = connection.getResponseCode();
-		
-		logger.info("The response code is -> " + responseCode);
 		
 		if (responseCode == 200) {
 			BufferedReader in = new BufferedReader(
@@ -206,9 +199,9 @@ public class OOPSEvaluator {
 		evaluationResults = new EvaluationResult();
 		
 		if (pitfallsList.getLength() == 0) {
-			logger.info("There are no pitfalls!");
+			logger.debug("There are no pitfalls!");
 		} else {
-			logger.info(String.format("There are %d pitfalls!  -->>", pitfallsList.getLength()));
+			logger.debug(String.format("There are %d pitfalls!  -->>", pitfallsList.getLength()));
 			for (int i = 0; i < pitfallsList.getLength(); i++) {
 				Element pitfall = (Element) pitfallsList.item(i);
 				Node pitfallDescriptionNode = pitfall.getElementsByTagName(OOPS_TAG_DESCRIPTION).item(0);
@@ -462,8 +455,7 @@ public class OOPSEvaluator {
 					for (int j = 0; j < affectedElements.getLength(); j++) {
 						Node affectedElement = affectedElements.item(j);
 						String affectedElementIRI = affectedElement.getTextContent();
-						logger.info(String.format("The pitfall for elem <%s> : [%s][%s] - (%s) -> Description : %s",
-								affectedElementIRI, pitfallCode, pitfallImportance, pitfallName, pitfallDescription));
+						
 						if (!detectedPitfalls.containsKey(affectedElementIRI)) {
 							detectedPitfalls.put(affectedElementIRI, new ArrayList<Pitfall>());
 						}
