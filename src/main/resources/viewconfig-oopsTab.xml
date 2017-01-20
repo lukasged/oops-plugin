@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-    <HSNode splits="0.7 0.2 0.1">
+    <HSNode splits="0.7 0.22 0.08">
         <VSNode splits="0.375 0.625">
             <CNode>
                 <Component label="Class hierarchy">
