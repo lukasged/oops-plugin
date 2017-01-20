@@ -100,6 +100,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         pitfallsTree = new JTree();
         pitfallsTree.setRootVisible(false); // hide the root node
+        pitfallsTree.setShowsRootHandles(true); // show root nodes' handles
         pitfallsTree.addTreeSelectionListener(event -> {
         	DefaultMutableTreeNode node = (DefaultMutableTreeNode) pitfallsTree.getLastSelectedPathComponent();
         	
