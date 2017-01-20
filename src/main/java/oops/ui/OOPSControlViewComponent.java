@@ -899,7 +899,14 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	 * @return the formatted description for the given info element
 	 */
 	private String getFormattedDescription(InfoElementWithAffectedElems infoElem) {
-		String formattedText = "<html><br><p>" + infoElem.getDescription() + "</p>";
+		String formattedText = "<html><br><p>";
+		
+		if (infoElem.getDescription() != null) {
+			formattedText += infoElem.getDescription();
+		} else {
+			formattedText += "The following elements are affected:";
+		}
+		formattedText += "</p>";
 		
 		for (String element : infoElem.getAffectedElements()) {
 			formattedText += "<p>> " + element + "</p>";

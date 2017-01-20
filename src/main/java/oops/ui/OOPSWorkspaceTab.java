@@ -14,9 +14,6 @@ import org.protege.editor.owl.model.selection.SelectionPlane;
 import org.protege.editor.owl.model.selection.SelectionPlaneImpl;
 import org.protege.editor.owl.ui.view.AbstractOWLSelectionViewComponent;
 import org.semanticweb.owlapi.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
 import java.util.Optional;
 

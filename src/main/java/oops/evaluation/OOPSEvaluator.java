@@ -29,7 +29,6 @@ import org.w3c.dom.NodeList;
 
 import oops.model.ElementPair;
 import oops.model.EvaluationResult;
-import oops.model.InfoElement;
 import oops.model.InfoElementWithAffectedElems;
 import oops.model.Pitfall;
 import oops.model.PitfallImportanceLevel;
@@ -531,12 +530,10 @@ public class OOPSEvaluator {
 			
 			for (int i = 0; i < warningsList.getLength(); i++) {
 				Element warning = (Element) warningsList.item(i);
-				Node elemDescriptionNode = warning.getElementsByTagName(OOPS_TAG_DESCRIPTION).item(0);
 				Node elemNameNode = warning.getElementsByTagName(OOPS_TAG_NAME).item(0);
 				Node numAffectedElemsNode = warning.getElementsByTagName(OOPS_TAG_NUMBER_AFFECTED_ELEMS).item(0);
 				Element affectsElement = (Element) warning.getElementsByTagName(OOPS_TAG_AFFECTS).item(0);
 
-				String description = elemDescriptionNode.getTextContent();
 				String name = elemNameNode.getTextContent();
 				int numAffectedElems = Integer.parseInt(numAffectedElemsNode.getTextContent());
 				
@@ -550,7 +547,7 @@ public class OOPSEvaluator {
 					affectedElements.add(affectedElementIRI);
 				}
 				
-				warnings.add(new InfoElementWithAffectedElems(name, description, numAffectedElems, affectedElements));
+				warnings.add(new InfoElementWithAffectedElems(name, null, numAffectedElems, affectedElements));
 			}
 			
 			evaluationResults.setWarnings(warnings);
