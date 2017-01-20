@@ -1,5 +1,6 @@
 package oops.ui;
 
+import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.ui.view.objectproperty.OWLObjectPropertyHierarchyViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,8 @@ import oops.evaluation.OOPSEvaluator;
 import oops.model.EvaluationResult;
 
 import javax.swing.*;
+import javax.swing.tree.TreeCellRenderer;
+
 import java.lang.reflect.InvocationTargetException;
 
 
@@ -26,6 +29,8 @@ public class OOPSObjectPropertyHierarchyViewComponent extends OWLObjectPropertyH
     private OOPSEvaluator evaluator;
     
     private EvaluationResult evaluationResult;
+    
+    private TreeCellRenderer defaultRenderer;
 
     @Override
     public void performExtraInitialisation() throws Exception {
@@ -35,11 +40,36 @@ public class OOPSObjectPropertyHierarchyViewComponent extends OWLObjectPropertyH
         
         evaluator.addListener(this);
         
+        defaultRenderer = getTree().getCellRenderer();
+        
         // if there already are existent results, update the UI with them
         EvaluationResult existentResults = OOPSEvaluator.getEvaluationResults();
         if (existentResults != null) {
         	onEvaluationDone(existentResults);
         }
+        
+        getOWLModelManager().addListener(event -> {
+            if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
+            	reset();
+            }
+        });
+    }
+    
+	public void reset() {
+		evaluationResult = null;
+
+		// set the default cell renderer
+		if (SwingUtilities.isEventDispatchThread()) {
+			getTree().setCellRenderer(defaultRenderer);
+		} else {
+			try {
+				SwingUtilities.invokeAndWait(() -> {
+					getTree().setCellRenderer(defaultRenderer);
+				});
+			} catch (InvocationTargetException | InterruptedException e) {
+				logger.error(e.getLocalizedMessage());
+			}
+		}
     }
 
     @Override
@@ -47,6 +77,7 @@ public class OOPSObjectPropertyHierarchyViewComponent extends OWLObjectPropertyH
         super.disposeView();
         
         evaluator.removeListener(this);
+        evaluationResult = null;
     }
 
 	@Override

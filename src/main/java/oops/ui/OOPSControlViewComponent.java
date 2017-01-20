@@ -44,6 +44,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -260,6 +261,12 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		add(btnEvaluate);
 		
 		evaluator.addListener(this); // listen to evaluation events to change the UI
+		
+		getOWLModelManager().addListener(event -> {
+            if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
+            	reset();
+            }
+        });
 		
 		btnEvaluate.addActionListener(event -> {
 			try {
@@ -917,9 +924,22 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		return formattedText;
 	}
 	
+	public void reset() {
+		evaluationResult = null;
+		btnListAllPitfalls.setEnabled(false);
+		configurationDone = false;
+		selectedFilter = null;
+		selectedCategory = null;
+    }
+	
 	@Override
 	protected void disposeOWLView() {
 		evaluator.removeListener(this);
+		evaluationResult = null;
+		btnListAllPitfalls.setEnabled(false);
+		configurationDone = false;
+		selectedFilter = null;
+		selectedCategory = null;
 	}
 
 	@Override

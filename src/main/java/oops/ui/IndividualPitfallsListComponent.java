@@ -22,6 +22,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.protege.editor.core.ui.util.Resettable;
 import org.protege.editor.core.util.HandlerRegistration;
+import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
@@ -158,6 +159,12 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         evaluator.addListener(this);
         
+        getOWLModelManager().addListener(event -> {
+            if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
+            	reset();
+            }
+        });
+        
         getOWLWorkspace().getOWLSelectionModel().addListener(this);
         getView().setShowViewBar(false); // disable view label bar
         selectionChanged();
@@ -270,8 +277,9 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
 	public void reset() {
         pitfallsTree.removeAll();
         pitfallsListLabel.setText("");
-        cardPanel.removeAll();
         validate();
+        evaluationResult = null;
+        selectionChanged();
     }
 
     private void selectPanel(String name) {
@@ -282,6 +290,8 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         evaluator.removeListener(this);
         pitfallsTree.removeAll();
         pitfallsListLabel.setText("");
+        evaluationResult = null;
+        selectionChanged();
     }
 
     @Override

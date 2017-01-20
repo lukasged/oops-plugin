@@ -5,7 +5,7 @@
 
 	<groupId>edu.stanford.protege</groupId>
 	<artifactId>oops</artifactId>
-	<version>0.0.1-ALPHA</version>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 
 	<name>OOPS! Evaluator</name>
@@ -31,7 +31,6 @@
 			<artifactId>owlapi-osgidistribution</artifactId>
 			<version>4.2.6</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -68,9 +67,9 @@
 						<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
 						<Bundle-Vendor>The Protege Development Team</Bundle-Vendor>
 						<Import-Package>
-							org.protege.editor.owl.*;version="5.0.0", <!-- equivalent to [4.3,infinity) -->
+							org.protege.editor.owl.*;version="5.0.0",
 							*
-						</Import-Package>						
+						</Import-Package>					
 					</instructions>
 				</configuration>
 			</plugin>
