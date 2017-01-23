@@ -1,6 +1,7 @@
 package oops.ui;
 
 import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.ui.view.dataproperty.OWLDataPropertyHierarchyViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class OOPSDataPropertyHierarchyViewComponent extends OWLDataPropertyHiera
     private EvaluationResult evaluationResult;
     
     private TreeCellRenderer defaultRenderer;
+    
+    private OWLModelManagerListener owlModelManagerListener;
 
     @Override
     public void performExtraInitialisation() throws Exception {
@@ -48,11 +51,12 @@ public class OOPSDataPropertyHierarchyViewComponent extends OWLDataPropertyHiera
         	onEvaluationDone(existentResults);
         }
         
-        getOWLModelManager().addListener(event -> {
+        owlModelManagerListener = event -> {
             if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
             	reset();
             }
-        });
+        };
+        getOWLModelManager().addListener(owlModelManagerListener);
     }
     
 	public void reset() {
@@ -78,6 +82,7 @@ public class OOPSDataPropertyHierarchyViewComponent extends OWLDataPropertyHiera
         
         evaluator.removeListener(this);
         evaluationResult = null;
+        getOWLModelManager().removeListener(owlModelManagerListener);
     }
 
 	@Override

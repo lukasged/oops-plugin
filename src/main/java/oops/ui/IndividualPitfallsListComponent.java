@@ -23,6 +23,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.protege.editor.core.ui.util.Resettable;
 import org.protege.editor.core.util.HandlerRegistration;
 import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.model.selection.SelectionDriver;
 import org.protege.editor.owl.model.selection.SelectionPlane;
@@ -87,7 +88,9 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
     private OWLEntity selEntity;
     private String selectedEntityIRI;
     
-    List<Pitfall> detectedPitfalls;
+    private OWLModelManagerListener owlModelManagerListener;
+    
+    private List<Pitfall> detectedPitfalls;
 
     protected void initialiseOWLView() throws Exception {
         setLayout(new BorderLayout());
@@ -159,11 +162,12 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         
         evaluator.addListener(this);
         
-        getOWLModelManager().addListener(event -> {
+        owlModelManagerListener = event -> {
             if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
             	reset();
             }
-        });
+        };
+        getOWLModelManager().addListener(owlModelManagerListener);
         
         getOWLWorkspace().getOWLSelectionModel().addListener(this);
         getView().setShowViewBar(false); // disable view label bar
@@ -292,6 +296,7 @@ public class IndividualPitfallsListComponent extends AbstractOWLViewComponent
         pitfallsListLabel.setText("");
         evaluationResult = null;
         selectionChanged();
+        getOWLModelManager().removeListener(owlModelManagerListener);
     }
 
     @Override

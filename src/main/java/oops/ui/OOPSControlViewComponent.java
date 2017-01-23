@@ -45,6 +45,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +233,8 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 	
 	private String selectedCategory; // selected category in the config dialog 
 	
+	private OWLModelManagerListener owlModelManagerListener;
+	
 	private OOPSEvaluator evaluator;
 	
 	private EvaluationDialog evaluatingDialog;
@@ -262,11 +265,12 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		
 		evaluator.addListener(this); // listen to evaluation events to change the UI
 		
-		getOWLModelManager().addListener(event -> {
-            if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
+		owlModelManagerListener = event -> {
+			if (event.isType(EventType.ACTIVE_ONTOLOGY_CHANGED)) {
             	reset();
             }
-        });
+		};
+		getOWLModelManager().addListener(owlModelManagerListener);
 		
 		btnEvaluate.addActionListener(event -> {
 			try {
@@ -940,6 +944,7 @@ public class OOPSControlViewComponent extends AbstractOWLViewComponent implement
 		configurationDone = false;
 		selectedFilter = null;
 		selectedCategory = null;
+		getOWLModelManager().removeListener(owlModelManagerListener);
 	}
 
 	@Override
