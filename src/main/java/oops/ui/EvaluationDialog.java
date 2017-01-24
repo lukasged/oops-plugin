@@ -11,7 +11,7 @@ import javax.swing.*;
  *
  * A custom popup window to show while evaluating the ontology
  */
-public class EvaluationDialog extends JPanel{
+public class EvaluationDialog extends JPanel {
 
 	private static final String EVALUATING_LABEL_TEXT = "OOPS! is scanning ...";
     

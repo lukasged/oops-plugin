@@ -13,23 +13,25 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<protege.version>5.1.0</protege.version>
+		<owlapi.version>4.2.6</owlapi.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>protege-editor-owl</artifactId>
-			<version>5.1.0</version>
+			<version>${protege.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>protege-editor-core</artifactId>
-			<version>5.1.0</version>
+			<version>${protege.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-osgidistribution</artifactId>
-			<version>4.2.6</version>
+			<version>${owlapi.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -67,9 +69,12 @@
 						<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
 						<Bundle-Vendor>The Protege Development Team</Bundle-Vendor>
 						<Import-Package>
+							org.protege.editor.core.*;version="5.0.0",
 							org.protege.editor.owl.*;version="5.0.0",
+							org.semanticweb.owlapi.*;version="[4.2.6,5.0.0)",
 							*
-						</Import-Package>					
+						</Import-Package>
+						<Update-Url>https://raw.githubusercontent.com/lukasged/oops-plugin/master/update.properties</Update-Url>				
 					</instructions>
 				</configuration>
 			</plugin>
