@@ -44,7 +44,7 @@ public class OOPSEvaluator {
     
     private static final Logger logger = LoggerFactory.getLogger(OOPSEvaluator.class);
     
-    private static final String OOPS_WS_ENDPOINT = "http://oops-ws.oeg-upm.net/rest";
+    private static final String OOPS_WS_ENDPOINT = "http://oops.linkeddata.es/rest";
     
     private static final String OOPS_WS_REQUEST_TEMPLATE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
     		+ "<OOPSRequest>"
